@@ -1,0 +1,14 @@
+.DS_Store
+~*
+#*
+.gitignore~
+db
+incremental_db
+*.rpt
+*.done
+*.smsg
+*.summary
+*.jdi
+*.pin
+*.sof
+*.bak
