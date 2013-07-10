@@ -1,4 +1,5 @@
 module cube_controller
+  #(parameter COUNTER_WIDTH=32)
   (
    input        CLOCK_50, // Reference clock
    output [7:0] LED,
@@ -12,10 +13,17 @@ module cube_controller
    input [1:0] GPIO_1_IN
    );
 
-
-   assign LED[0] = SW[0] & SW[1];
-   assign LED[1] = SW[0] | SW[1];
-   assign GPIO_0[3:0] = SW[3:0];
+   wire global_reset_n;
+   wire [COUNTER_WIDTH-1:0] counter_val;
+   
+   sync_async_reset reset_block 
+     (.clk(CLOCK_50), .reset_n(KEY[0]), .synced_reset_n(global_reset_n));
+   binary_counter #(.N(COUNTER_WIDTH)) counter
+     (.clk(CLOCK_50), .reset_n(global_reset_n), .count(counter_val));
+   rom control_rom 
+     (.clk(CLOCK_50), .addr(counter_val[28:25]), .data(GPIO_0[7:0]));
+   
+   assign LED = SW;
    
 endmodule
 
