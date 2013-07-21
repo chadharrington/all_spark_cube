@@ -12,3 +12,4 @@ incremental_db
 *.pin
 *.sof
 *.bak
+*.cdf
