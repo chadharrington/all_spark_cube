@@ -1,36 +1,108 @@
 
 module rom
-   (
-    input clk,
-    input [3:0] addr,
-    output [7:0] data
+  (
+   input       clk,
+   input       reset_n,
+   input [5:0] addr,
+   output      load,
+   output      shift,
+   output      sclk,
+   output      output_enable_n,
+   output      latch_enable
    );
- 
-   reg [7:0] rom_data, data_reg;
- 
-   always @(posedge clk)
-      data_reg <= rom_data;
-  
+   
+   reg [4:0]   rom_data, data_reg;
+   
+   always @(posedge clk, negedge reset_n)
+     begin
+        if (!reset_n)
+          begin
+             data_reg <= 6'b00010;
+          end
+        else
+          begin
+             data_reg <= rom_data;
+          end
+     end
+   
    always @*
-      case (addr)
-         4'h0: rom_data = 8'b10000000;
-         4'h1: rom_data = 8'b10000001;
-         4'h2: rom_data = 8'b00000010;
-         4'h3: rom_data = 8'b10000011;
-         4'h4: rom_data = 8'b00000100;
-         4'h5: rom_data = 8'b00000101;
-         4'h6: rom_data = 8'b00000110;
-         4'h7: rom_data = 8'b10000111;
-         4'h8: rom_data = 8'b00001000;
-         4'h9: rom_data = 8'b00001001;
-         4'ha: rom_data = 8'b10001010;
-         4'hb: rom_data = 8'b0001011;
-         4'hc: rom_data = 8'b00001100;
-         4'hd: rom_data = 8'b10001101;
-         4'he: rom_data = 8'b00001110;
-         4'hf: rom_data = 8'b10001111;
-      endcase
-  
-   assign data = data_reg;
+     begin
+        case (addr)
+          // data = load, shift, sclk, oe_n, le
+          6'd00: rom_data = 5'b00010; // Begin Normal Mode
+          6'd01: rom_data = 5'b00010;
+          6'd02: rom_data = 5'b00010;
+          6'd03: rom_data = 5'b00110;
+          6'd04: rom_data = 5'b00000;
+          6'd05: rom_data = 5'b00100;
+          6'd06: rom_data = 5'b00010;
+          6'd07: rom_data = 5'b00110;
+          6'd08: rom_data = 5'b00010;
+          6'd09: rom_data = 5'b00110;
+          6'd10: rom_data = 5'b00010;
+          6'd11: rom_data = 5'b00110;
+          6'd12: rom_data = 5'b10010; // Normal mode enabled
+          6'd13: rom_data = 5'b00000;
+          6'd14: rom_data = 5'b01100;
+          6'd15: rom_data = 5'b00000;
+          6'd16: rom_data = 5'b01100;
+          6'd17: rom_data = 5'b00000;
+          6'd18: rom_data = 5'b01100;
+          6'd19: rom_data = 5'b00000;
+          6'd20: rom_data = 5'b01100;
+          6'd21: rom_data = 5'b00000;
+          6'd22: rom_data = 5'b01100;
+          6'd23: rom_data = 5'b00000;
+          6'd24: rom_data = 5'b01100;
+          6'd25: rom_data = 5'b00000;
+          6'd26: rom_data = 5'b01100;
+          6'd27: rom_data = 5'b00000;
+          6'd28: rom_data = 5'b00100;
+          6'd29: rom_data = 5'b00000; // Data clocked in
+          6'd30: rom_data = 5'b00001; // Data latched
+          6'd31: rom_data = 5'b00000; // End Normal Mode
+          6'd32: rom_data = 5'b00010; // Begin Special Mode
+          6'd33: rom_data = 5'b00010;
+          6'd34: rom_data = 5'b00010;
+          6'd35: rom_data = 5'b00110;
+          6'd36: rom_data = 5'b00000;
+          6'd37: rom_data = 5'b00100;
+          6'd38: rom_data = 5'b00010;
+          6'd39: rom_data = 5'b00110;
+          6'd40: rom_data = 5'b00011;
+          6'd41: rom_data = 5'b00111;
+          6'd42: rom_data = 5'b00010;
+          6'd43: rom_data = 5'b00110;
+          6'd44: rom_data = 5'b10010; // Special mode enabled
+          6'd45: rom_data = 5'b00010;
+          6'd46: rom_data = 5'b01110;
+          6'd47: rom_data = 5'b00010;
+          6'd48: rom_data = 5'b01110;
+          6'd49: rom_data = 5'b00010;
+          6'd50: rom_data = 5'b01110;
+          6'd51: rom_data = 5'b00010;
+          6'd52: rom_data = 5'b01110;
+          6'd53: rom_data = 5'b00010;
+          6'd54: rom_data = 5'b01110;
+          6'd55: rom_data = 5'b00010;
+          6'd56: rom_data = 5'b01110;
+          6'd57: rom_data = 5'b00010;
+          6'd58: rom_data = 5'b01110;
+          6'd59: rom_data = 5'b00010;
+          6'd60: rom_data = 5'b00110;
+          6'd61: rom_data = 5'b00010; // Data clocked in
+          6'd62: rom_data = 5'b00011; // Data latched
+          6'd63: rom_data = 5'b00010; // End Special Mode
+
+        endcase // case (addr)
+     end // always @ *
+   
+   
+   assign load = data_reg[4];
+   assign shift = data_reg[3];
+   assign sclk = data_reg[2];
+   assign output_enable_n = data_reg[1];
+   assign latch_enable = data_reg[0];
+
 
 endmodule
