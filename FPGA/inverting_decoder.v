@@ -5,6 +5,6 @@ module inverting_decoder
    output [15:0] y_n
    );
 
-   assign y_n = ~(1 << addr);
+   assign y_n = ~(1'b1 << addr);
 
 endmodule

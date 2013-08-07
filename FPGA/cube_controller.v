@@ -13,20 +13,34 @@ module cube_controller
    );
 
    wire [7:0]   led_vals, brightness;
+   wire         reset_n;
+   
 
    controller cont
-     (.clk(CLOCK_50), .reset_n(KEY[0]), .led_vals(led_vals), 
-      .brightness(brightness), .serial_clk(GPIO_0[7]), 
-      .serial_out(GPIO_0[6]), .output_enable_n(GPIO_0[5]),
-      .latch_enable(GPIO_0[4]));
+     (.clk(CLOCK_50), 
+      .reset_n(reset_n), 
+      .serial_clk(GPIO_0[0]), 
+      .latch_enable(GPIO_0[1]), 
+      .output_enable_n(GPIO_0[2]), 
+      .serial_data_out_0_red(GPIO_0[8]),
+      .serial_data_out_1_red(GPIO_0[9]),
+      .serial_data_out_2_red(GPIO_0[10]),
+      .serial_data_out_3_red(GPIO_0[11]),
+      .serial_data_out_0_green(GPIO_0[16]),
+      .serial_data_out_1_green(GPIO_0[17]),
+      .serial_data_out_2_green(GPIO_0[18]),
+      .serial_data_out_3_green(GPIO_0[19]),
+      .serial_data_out_0_blue(GPIO_0[24]),
+      .serial_data_out_1_blue(GPIO_0[25]),
+      .serial_data_out_2_blue(GPIO_0[26]),
+      .serial_data_out_3_blue(GPIO_0[27]),
+      .row_select_n(GPIO_1[15:0])
+      );
 
-   assign led_vals = {SW, SW};
-   assign LED = led_vals;
-   assign brightness = 8'hff;
-   //assign color = 8'd0;
-   //assign color = 8'hff;
-   //assign brightness = 8'b10101010;
-
+   // Resets are active low, ANDing them provides OR behavior
+   assign reset_n = KEY[0] & GPIO_2[11]; 
+   
+   
 endmodule
 
 

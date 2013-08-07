@@ -17,7 +17,7 @@ module binary_counter
 
    always @(*)
      begin
-        next_count = count_reg + 1;
+        next_count = count_reg + 1'b1;
         if (next_count > MAX_COUNT)
           next_count = 0;
      end
