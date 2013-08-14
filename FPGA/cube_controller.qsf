@@ -5,7 +5,7 @@
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE22F17C6
 set_global_assignment -name TOP_LEVEL_ENTITY "cube_controller"
-set_global_assignment -name ORIGINAL_QUARTUS_VERSION "12.0"
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 12.0
 set_global_assignment -name LAST_QUARTUS_VERSION 13.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "11:36:25 JULY 09,2013"
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA

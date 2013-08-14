@@ -3,17 +3,21 @@
 module controller_testbench;
 
    reg clk, reset_n;
-   wire [7:0] led_vals, brightness;
-   wire      serial_clk, serial_out, output_enable_n, latch_enable;
+   wire serial_clk, output_enable_n, latch_enable;
+   wire [3:0] serial_data_out_red;
+   wire [3:0] serial_data_out_green;
+   wire [3:0] serial_data_out_blue;
+   wire [15:0] row_select_n;
+   
 
    controller uut
-     (.clk(clk), .reset_n(reset_n), .led_vals(led_vals), 
-      .brightness(brightness), .serial_clk(serial_clk),
-      .serial_out(serial_out), .output_enable_n(output_enable_n),
-      .latch_enable(latch_enable));
-
-   assign led_vals = 8'b10101110;
-   assign brightness = 8'b00110011;
+     (.clk(clk), .reset_n(reset_n), .serial_clk(serial_clk),
+      .latch_enable(latch_enable), .output_enable_n(output_enable_n),
+      .serial_data_out_red(serial_data_out_red), 
+      .serial_data_out_green(serial_data_out_green),
+      .serial_data_out_blue(serial_data_out_blue),
+      .row_select_n(row_select_n));
+   
 
    always begin  // 50MHz clock
       clk = 1'b1;
