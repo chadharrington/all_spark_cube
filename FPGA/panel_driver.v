@@ -38,12 +38,13 @@ module panel_driver
    assign brightness_extended = {8'h00, brightness};
 
    // Temporary - replace with RAM 
-   assign vals_red = 16'haaaa;
-   assign vals_green= 16'h5555;
-   assign vals_blue = 16'haaaa;
-   assign brightness = 8'hff;
-   
+   //assign vals_red = 16'haaaa;
+   //assign vals_green= 16'h5555;
+   //assign vals_blue = 16'haaaa;
 
-   
-   
+   assign vals_red = 16'hffff;
+   assign vals_green= 16'hffff;
+   assign vals_blue = 16'hffff;
+   assign brightness = 8'hff;
+      
 endmodule // panel_driver
