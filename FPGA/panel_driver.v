@@ -1,49 +1,47 @@
 
 module panel_driver
   (
-   input  clk,
-   input  reset_n,
-   input  shift,
-   input  load_led_vals,
-   input  load_brightness,
-   output serial_data_out_red,
-   output serial_data_out_green,
-   output serial_data_out_blue
+   input         clk,
+   input         reset_n,
+   input         shift,
+   input         load_led_vals,
+   input         load_brightness,
+   input [7:0]   brightness,
+   input [3:0]   read_port_row_addr,
+   input [3:0]   write_port_row_addr,
+   input         write_port_enable_red,
+   input         write_port_enable_green, 
+   input         write_port_enable_blue, 
+   input [127:0] pwm_values,
+   input [7:0]   pwm_step, 
+   output        serial_data_out_red,
+   output        serial_data_out_green,
+   output        serial_data_out_blue
    );
 
-   wire [7:0] brightness;
-   
-   wire [15:0] brightness_extended;
-   wire [15:0] vals_red, vals_green, vals_blue;
-   
+   row_color_driver red_driver
+     (.clk(clk), .reset_n(reset_n), .shift(shift), 
+      .load_led_vals(load_led_vals), .load_brightness(load_brightness),
+      .brightness(brightness), .read_port_row_addr(read_port_row_addr),
+      .write_port_row_addr(write_port_row_addr), 
+      .write_port_enable(write_port_enable_red), .pwm_values(pwm_values),
+      .pwm_step(pwm_step), .serial_data_out(serial_data_out_red));
 
-   piso_shift_register #(.WIDTH(16)) sr_red
-     (.clk(clk), .reset_n(reset_n),
-      .par_in_a(vals_red), .par_in_b(brightness_extended), 
-      .load_a(load_led_vals), .load_b(load_brightness), 
-      .shift(shift), .ser_out(serial_data_out_red));
+   row_color_driver green_driver
+     (.clk(clk), .reset_n(reset_n), .shift(shift), 
+      .load_led_vals(load_led_vals), .load_brightness(load_brightness),
+      .brightness(brightness), .read_port_row_addr(read_port_row_addr),
+      .write_port_row_addr(write_port_row_addr), 
+      .write_port_enable(write_port_enable_green), .pwm_values(pwm_values),
+      .pwm_step(pwm_step), .serial_data_out(serial_data_out_green));
 
-   piso_shift_register #(.WIDTH(16)) sr_green
-     (.clk(clk), .reset_n(reset_n),
-      .par_in_a(vals_green), .par_in_b(brightness_extended), 
-      .load_a(load_led_vals), .load_b(load_brightness), 
-      .shift(shift), .ser_out(serial_data_out_green));
-
-   piso_shift_register #(.WIDTH(16)) sr_blue
-     (.clk(clk), .reset_n(reset_n),
-      .par_in_a(vals_blue), .par_in_b(brightness_extended), 
-      .load_a(load_led_vals), .load_b(load_brightness), 
-      .shift(shift), .ser_out(serial_data_out_blue));
-
-   assign brightness_extended = {8'h00, brightness};
-
-   // Temporary - replace with RAM 
-   assign vals_red = 16'haaaa;
-   assign vals_green= 16'h5555;
-   assign vals_blue = 16'haaaa;
-   assign brightness = 8'hff;
-   
-
+   row_color_driver blue_driver
+     (.clk(clk), .reset_n(reset_n), .shift(shift), 
+      .load_led_vals(load_led_vals), .load_brightness(load_brightness),
+      .brightness(brightness), .read_port_row_addr(read_port_row_addr),
+      .write_port_row_addr(write_port_row_addr), 
+      .write_port_enable(write_port_enable_blue), .pwm_values(pwm_values),
+      .pwm_step(pwm_step), .serial_data_out(serial_data_out_blue));
    
    
 endmodule // panel_driver
