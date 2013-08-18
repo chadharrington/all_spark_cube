@@ -11,32 +11,36 @@ module controller
    output [15:0] row_select_n
    );
 
-   wire          global_reset_n, load, load_led_vals, load_brightness, shift;
+   wire          global_reset_n, shift;
+   wire          load, load_led_vals, load_brightness, special_mode;
    wire [18:0]   count;
-
-   //TODO: Remove these debugging lines
+   wire [6:0]    driver_step;
+   wire [7:0]    pwm_step;
    wire [3:0]    row;
+
+   assign driver_step = {special_mode, count[5:0]};
+   assign pwm_step = count[13:6];
    assign row = count[17:14];
+   assign special_mode = count[18];
+   assign load_led_vals = load & !special_mode;
+   assign load_brightness = load & special_mode;
+
    
    sync_async_reset resetter 
      (.clk(clk), .reset_n(reset_n), .synced_reset_n(global_reset_n));
 
    rom control_rom
-     (.clk(clk), .reset_n(global_reset_n), .addr({count[17], count[5:0]}),
+     (.clk(clk), .reset_n(global_reset_n), .addr(driver_step),
       .load(load), .shift(shift), .sclk(serial_clk), 
       .output_enable_n(output_enable_n), .latch_enable(latch_enable));
 
-   // Counter bits:
-   // 0-5   Serial output control sequence step
-   // 6-13  PWM step
-   // 14-17 Row number
-   // 18    Special mode on/off
    // Reset the counter after the special mode is run (2**18+2**6)
    binary_counter #(.N(19), .MAX_COUNT(2**18+2**6)) counter
      (.clk(clk), .reset_n(global_reset_n), .count(count));
 
-   inverting_decoder decoder
+   inverting_decoder #(.WIDTH(4)) row_driver_decoder
      (.addr(row), .y_n(row_select_n));
+
 
    genvar        i;
    generate
@@ -50,9 +54,7 @@ module controller
               .serial_data_out_blue(serial_data_out_blue[i]));
         end
    endgenerate
-   
-   assign load_led_vals = load & !count[17];
-   assign load_brightness = load & count[17];
+
    
 
 endmodule // controller
