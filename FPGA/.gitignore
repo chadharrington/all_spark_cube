@@ -13,3 +13,5 @@ incremental_db
 *.sof
 *.bak
 *.cdf
+*.jic
+*.map
