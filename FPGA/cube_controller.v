@@ -12,29 +12,34 @@ module cube_controller
    output [7:0] LED
    );
 
-   wire [15:0]   row_select_n;
-   wire          clk;
-   wire          reset_n;
+   wire [7:0]   led_vals, brightness;
+   wire         clk, reset_n;
+   wire         serial_clk, latch_enable, output_enable_n;
+   wire [15:0]  row_select_n;
    
-
-   controller cont
-     (.clk(clk), 
-      .reset_n(reset_n), 
-      .serial_clk(GPIO_0[0]), 
-      .latch_enable(GPIO_0[1]), 
-      .output_enable_n(GPIO_0[2]), 
-      .serial_data_out_red({GPIO_0[8], GPIO_0[9], GPIO_0[10], GPIO_0[11]}),
-      .serial_data_out_green({GPIO_0[16], GPIO_0[17], GPIO_0[18], GPIO_0[19]}),
-      .serial_data_out_blue({GPIO_0[24], GPIO_0[25], GPIO_0[26], GPIO_0[27]}),
-      .row_select_n(row_select_n)
-      );
-
    // Resets are active low, ANDing them provides OR behavior
    assign reset_n = KEY[0] & GPIO_2[11];
    assign clk = CLOCK_50;
+
+   // TODO: Remove these debugging lines and corresponding controller outputs
    assign GPIO_1[15:0] = row_select_n;
+   assign GPIO_0[0] = serial_clk;
+   assign GPIO_0[1] = latch_enable;
+   assign GPIO_0[2] = output_enable_n;
+   assign GPIO_1[15:0] = row_select_n;
+   assign LED = {row_select_n[4:0], serial_clk, output_enable_n, latch_enable};
+
    
-   assign LED = row_select_n[7:0];
-   
-   
+   controller cont
+     (.clk(clk), 
+      .reset_n(reset_n), 
+      .serial_clk(serial_clk), 
+      .latch_enable(latch_enable), 
+      .output_enable_n(output_enable_n),
+      .serial_data_out({GPIO_0[8], GPIO_0[9], GPIO_0[10], GPIO_0[11],
+                        GPIO_0[16], GPIO_0[17], GPIO_0[18], GPIO_0[19],
+                        GPIO_0[24], GPIO_0[25], GPIO_0[26], GPIO_0[27]}),
+      .row_select_n(row_select_n)
+      );
+
 endmodule

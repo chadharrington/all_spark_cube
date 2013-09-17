@@ -16,7 +16,7 @@ module piso_shift_register
    
    always @(posedge clk, negedge reset_n)
      if (!reset_n)
-       data_reg <= 0;
+       data_reg <= {WIDTH {1'b0}};
      else
        if (load_a)
          data_reg <= par_in_a;

@@ -1,50 +1,34 @@
 
 module panel_driver
   (
-   input  clk,
-   input  reset_n,
-   input  shift,
-   input  load_led_vals,
-   input  load_brightness,
-   output serial_data_out_red,
-   output serial_data_out_green,
-   output serial_data_out_blue
+   input        clk,
+   input        reset_n,
+   input        shift,
+   input        load_led_vals,
+   input        load_brightness,
+   input [7:0]  pwm_time,
+   output [2:0] serial_data_out
    );
 
-   wire [7:0] brightness;
+   wire [7:0]   component_values[2:0];
+
+   // Purple-ish color
+   assign component_values[0] = 8'd153; // red
+   assign component_values[1] = 8'd0;  // green
+   assign component_values[2] = 8'd153;  // blue
    
-   wire [15:0] brightness_extended;
-   wire [15:0] vals_red, vals_green, vals_blue;
+
+   genvar       i;
+   generate
+      for (i=0; i<3; i=i+1)
+        begin : color_component_drivers
+           color_component_driver color_component_driver_instance
+             (.clk(clk), .reset_n(reset_n), .shift(shift), 
+              .load_led_vals(load_led_vals), .load_brightness(load_brightness),
+              .pwm_time(pwm_time), .component_value(component_values[i]),
+              .serial_data_out(serial_data_out[i]));
+        end
+   endgenerate
+
    
-
-   piso_shift_register #(.WIDTH(16)) sr_red
-     (.clk(clk), .reset_n(reset_n),
-      .par_in_a(vals_red), .par_in_b(brightness_extended), 
-      .load_a(load_led_vals), .load_b(load_brightness), 
-      .shift(shift), .ser_out(serial_data_out_red));
-
-   piso_shift_register #(.WIDTH(16)) sr_green
-     (.clk(clk), .reset_n(reset_n),
-      .par_in_a(vals_green), .par_in_b(brightness_extended), 
-      .load_a(load_led_vals), .load_b(load_brightness), 
-      .shift(shift), .ser_out(serial_data_out_green));
-
-   piso_shift_register #(.WIDTH(16)) sr_blue
-     (.clk(clk), .reset_n(reset_n),
-      .par_in_a(vals_blue), .par_in_b(brightness_extended), 
-      .load_a(load_led_vals), .load_b(load_brightness), 
-      .shift(shift), .ser_out(serial_data_out_blue));
-
-   assign brightness_extended = {8'h00, brightness};
-
-   // Temporary - replace with RAM 
-   //assign vals_red = 16'haaaa;
-   //assign vals_green= 16'h5555;
-   //assign vals_blue = 16'haaaa;
-
-   assign vals_red = 16'hffff;
-   assign vals_green= 16'hffff;
-   assign vals_blue = 16'hffff;
-   assign brightness = 8'hff;
-      
 endmodule // panel_driver

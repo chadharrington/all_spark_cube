@@ -5,9 +5,7 @@ module controller
    output        serial_clk,
    output        latch_enable,
    output        output_enable_n,
-   output [3:0]  serial_data_out_red,
-   output [3:0]  serial_data_out_green,
-   output [3:0]  serial_data_out_blue,
+   output [11:0] serial_data_out,
    output [15:0] row_select_n
    );
 
@@ -15,11 +13,12 @@ module controller
    wire          load, load_led_vals, load_brightness, special_mode;
    wire [18:0]   count;
    wire [6:0]    driver_step;
-   wire [7:0]    pwm_step;
+   wire [7:0]    pwm_time;
    wire [3:0]    row;
 
+
    assign driver_step = {special_mode, count[5:0]};
-   assign pwm_step = count[13:6];
+   assign pwm_time = count[13:6];
    assign row = count[17:14];
    assign special_mode = count[18];
    assign load_led_vals = load & !special_mode;
@@ -49,9 +48,10 @@ module controller
            panel_driver panel_driver_instance
              (.clk(clk), .reset_n(global_reset_n), .shift(shift), 
               .load_led_vals(load_led_vals), .load_brightness(load_brightness),
-              .serial_data_out_red(serial_data_out_red[i]),
-              .serial_data_out_green(serial_data_out_green[i]),
-              .serial_data_out_blue(serial_data_out_blue[i]));
+              .pwm_time(pwm_time), 
+              .serial_data_out({serial_data_out[i*3], 
+                                serial_data_out[i*3+1], 
+                                serial_data_out[i*3+2]}));
         end
    endgenerate
 
