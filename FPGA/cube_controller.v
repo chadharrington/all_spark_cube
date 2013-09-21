@@ -37,8 +37,8 @@ module cube_controller
       .latch_enable(latch_enable), 
       .output_enable_n(output_enable_n),
       .serial_data_out({GPIO_0[8], GPIO_0[9], GPIO_0[10], GPIO_0[11],
-                        GPIO_0[16], GPIO_0[17], GPIO_0[18], GPIO_0[19],
-                        GPIO_0[24], GPIO_0[25], GPIO_0[26], GPIO_0[27]}),
+                        GPIO_0[17], GPIO_0[19], GPIO_0[24], GPIO_0[26],
+                        GPIO_0[18], GPIO_0[16], GPIO_0[25], GPIO_0[27]}),
       .row_select_n(row_select_n)
       );
 
