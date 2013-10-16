@@ -16,6 +16,8 @@ module controller
    wire [7:0]    pwm_time;
    wire [3:0]    row;
 
+   wire [383:0]  row_colors;
+
 
    assign driver_step = {special_mode, count[5:0]};
    assign pwm_time = count[13:6];
@@ -24,6 +26,24 @@ module controller
    assign load_led_vals = load & !special_mode;
    assign load_brightness = load & special_mode;
 
+   assign row_colors = { 
+                         {8'hff, 8'hff, 8'hff}, // 1
+                         {8'h00, 8'h00, 8'h00}, // 2
+                         {8'h00, 8'h00, 8'h00}, // 3
+                         {8'h00, 8'h00, 8'h00}, // 4
+                         {8'h00, 8'h00, 8'h00}, // 5
+                         {8'h00, 8'h00, 8'h00}, // 6
+                         {8'h00, 8'h00, 8'h00}, // 7
+                         {8'h00, 8'h00, 8'h00}, // 8
+                         {8'h00, 8'h00, 8'h00}, // 9
+                         {8'h00, 8'h00, 8'h00}, // 10
+                         {8'h00, 8'h00, 8'h00}, // 11
+                         {8'h00, 8'h00, 8'h00}, // 12
+                         {8'h00, 8'h00, 8'h00}, // 13
+                         {8'h00, 8'h00, 8'h00}, // 14
+                         {8'h00, 8'h00, 8'h00}, // 15
+                         {8'h00, 8'h00, 8'h00}}; // 16                         
+   
    
    sync_async_reset resetter 
      (.clk(clk), .reset_n(reset_n), .synced_reset_n(global_reset_n));
@@ -46,16 +66,18 @@ module controller
       for (i=0; i<4; i=i+1)
         begin : panel_drivers
            panel_driver panel_driver_instance
-             (.clk(clk), .reset_n(global_reset_n), .shift(shift), 
-              .load_led_vals(load_led_vals), .load_brightness(load_brightness),
-              .pwm_time(pwm_time), 
+             (.clk(clk), 
+              .reset_n(global_reset_n), 
+              .shift(shift), 
+              .load_led_vals(load_led_vals), 
+              .load_brightness(load_brightness),
+              .pwm_time(pwm_time),
+              .row_colors(row_colors),
               .serial_data_out({serial_data_out[i*3], 
                                 serial_data_out[i*3+1], 
                                 serial_data_out[i*3+2]}));
         end
    endgenerate
-
-   
 
 endmodule // controller
 
