@@ -2,6 +2,7 @@ module controller
   (
    input         clk,
    input         reset_n,
+   input         test_panel_select_n,
    output        serial_clk,
    output        latch_enable,
    output        output_enable_n,
@@ -26,6 +27,7 @@ module controller
    assign load_led_vals = load & !special_mode;
    assign load_brightness = load & special_mode;
 
+   // TODO: Redo this with highest vals first...
    assign row_colors = { 
                          {8'hff, 8'hff, 8'hff}, // 1
                          {8'h00, 8'h00, 8'h00}, // 2
@@ -35,7 +37,7 @@ module controller
                          {8'h00, 8'h00, 8'h00}, // 6
                          {8'h00, 8'h00, 8'h00}, // 7
                          {8'h00, 8'h00, 8'h00}, // 8
-                         {8'h00, 8'h00, 8'h00}, // 9
+                         {8'hff, 8'h00, 8'h00}, // 9
                          {8'h00, 8'h00, 8'h00}, // 10
                          {8'h00, 8'h00, 8'h00}, // 11
                          {8'h00, 8'h00, 8'h00}, // 12
@@ -67,7 +69,8 @@ module controller
         begin : panel_drivers
            panel_driver panel_driver_instance
              (.clk(clk), 
-              .reset_n(global_reset_n), 
+              .reset_n(global_reset_n),
+              .test_panel_select_n(test_panel_select_n),
               .shift(shift), 
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),

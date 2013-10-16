@@ -16,6 +16,8 @@ module cube_controller
    wire         clk, reset_n;
    wire         serial_clk, latch_enable, output_enable_n;
    wire [15:0]  row_select_n;
+   wire         test_panel_select_n;
+   
    
    // Resets are active low, ANDing them provides OR behavior
    assign reset_n = KEY[0] & GPIO_2[11];
@@ -29,10 +31,15 @@ module cube_controller
    assign GPIO_1[15:0] = row_select_n;
    assign LED = {row_select_n[4:0], serial_clk, output_enable_n, latch_enable};
 
+   // TODO: Assign test_panel_select_n to GPIO_1[33]
+   assign test_panel_select_n = 1'b0;
+   //assign test_panel_select_n = GPIO_1[33];
+   
    
    controller cont
      (.clk(clk), 
-      .reset_n(reset_n), 
+      .reset_n(reset_n),
+      .test_panel_select_n(test_panel_select_n),
       .serial_clk(serial_clk), 
       .latch_enable(latch_enable), 
       .output_enable_n(output_enable_n),

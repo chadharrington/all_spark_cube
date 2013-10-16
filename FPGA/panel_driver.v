@@ -1,14 +1,15 @@
 
 module panel_driver
   (
-   input        clk,
-   input        reset_n,
-   input        shift,
-   input        load_led_vals,
-   input        load_brightness,
-   input [7:0]  pwm_time,
+   input         clk,
+   input         reset_n,
+   input         test_panel_select_n,         
+   input         shift,
+   input         load_led_vals,
+   input         load_brightness,
+   input [7:0]   pwm_time,
    input [383:0] row_colors,
-   output [2:0] serial_data_out
+   output [2:0]  serial_data_out
    );
 
 
@@ -19,6 +20,7 @@ module panel_driver
            color_component_driver color_component_driver_instance
              (.clk(clk), 
               .reset_n(reset_n),
+              .test_panel_select_n(test_panel_select_n),
               .shift(shift), 
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),
