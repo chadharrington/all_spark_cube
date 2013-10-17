@@ -27,24 +27,24 @@ module controller
    assign load_led_vals = load & !special_mode;
    assign load_brightness = load & special_mode;
 
-   // TODO: Redo this with highest vals first...
+   // R, G, B order
    assign row_colors = { 
-                         {8'hff, 8'hff, 8'hff}, // 1
-                         {8'h00, 8'h00, 8'h00}, // 2
-                         {8'h00, 8'h00, 8'h00}, // 3
-                         {8'h00, 8'h00, 8'h00}, // 4
-                         {8'h00, 8'h00, 8'h00}, // 5
-                         {8'h00, 8'h00, 8'h00}, // 6
-                         {8'h00, 8'h00, 8'h00}, // 7
-                         {8'h00, 8'h00, 8'h00}, // 8
-                         {8'hff, 8'h00, 8'h00}, // 9
-                         {8'h00, 8'h00, 8'h00}, // 10
-                         {8'h00, 8'h00, 8'h00}, // 11
-                         {8'h00, 8'h00, 8'h00}, // 12
-                         {8'h00, 8'h00, 8'h00}, // 13
+                         {8'h00, 8'h00, 8'hff}, // 16
+                         {8'h22, 8'hff, 8'haa}, // 15
                          {8'h00, 8'h00, 8'h00}, // 14
-                         {8'h00, 8'h00, 8'h00}, // 15
-                         {8'h00, 8'h00, 8'h00}}; // 16                         
+                         {8'h00, 8'h00, 8'h00}, // 13
+                         {8'hff, 8'h00, 8'h00}, // 12
+                         {8'h00, 8'hff, 8'h00}, // 11
+                         {8'h00, 8'h00, 8'hff}, // 10
+                         {8'h00, 8'h00, 8'h00}, // 9
+                         {8'hff, 8'h00, 8'h00}, // 8
+                         {8'h00, 8'h00, 8'h00}, // 7
+                         {8'h00, 8'h00, 8'h00}, // 6
+                         {8'h00, 8'h00, 8'h00}, // 5
+                         {8'h00, 8'h00, 8'hff}, // 4
+                         {8'h00, 8'hff, 8'h00}, // 3
+                         {8'hff, 8'h00, 8'h00}, // 2
+                         {8'h00, 8'hff, 8'h00}}; // 1                         
    
    
    sync_async_reset resetter 
@@ -76,9 +76,9 @@ module controller
               .load_brightness(load_brightness),
               .pwm_time(pwm_time),
               .row_colors(row_colors),
-              .serial_data_out({serial_data_out[i*3], 
+              .serial_data_out({serial_data_out[i*3+2], 
                                 serial_data_out[i*3+1], 
-                                serial_data_out[i*3+2]}));
+                                serial_data_out[i*3]}));
         end
    endgenerate
 
