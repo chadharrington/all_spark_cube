@@ -43,8 +43,8 @@ module cube_controller
       .serial_clk(serial_clk), 
       .latch_enable(latch_enable), 
       .output_enable_n(output_enable_n),
-      // Note that the numbers here are different from the schematic
-      // in order to compensate for PCB layout placement errors
+      // Note that the port numbers here are different from the schematic
+      // in order to compensate for the PCB layout placement errors
       .serial_data_out({GPIO_0[27], GPIO_0[26], GPIO_0[11], // Panel 3
                         GPIO_0[25], GPIO_0[24], GPIO_0[10], // Panel 2
                         GPIO_0[16], GPIO_0[19], GPIO_0[9],  // Panel 1
