@@ -2,7 +2,7 @@ module test_panel_adapter
   (
    input         clk,
    input         test_panel_select_n,
-   input [15:0]  led_vals_in,
+   input  [15:0] led_vals_in,
    output [15:0] led_vals_out
    );
 
