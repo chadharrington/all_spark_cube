@@ -12,44 +12,58 @@ module cube_controller
    output [7:0] LED
    );
 
-   wire [7:0]   led_vals, brightness;
-   wire         clk, reset_n;
-   wire         serial_clk, latch_enable, output_enable_n;
-   wire [15:0]  row_select_n;
+   wire         clk, reset_n, reset_n_raw;
    wire         test_panel_select_n;
-   
+   wire [15:0]  panel_switches;
+   wire [383:0] row_data;
+   wire [3:0]   row_data_row_addr;
+   wire [1:0]   row_data_panel_addr;
+   wire         row_data_write_enable;
    
    // Resets are active low, ANDing them provides OR behavior
-   assign reset_n = KEY[0] & GPIO_2[11];
+   assign reset_n_raw = KEY[0] & GPIO_2[11];
    assign clk = CLOCK_50;
-
-   // TODO: Remove these debugging lines and corresponding controller outputs
-   assign GPIO_1[15:0] = row_select_n;
-   assign GPIO_0[0] = serial_clk;
-   assign GPIO_0[1] = latch_enable;
-   assign GPIO_0[2] = output_enable_n;
-   assign GPIO_1[15:0] = row_select_n;
-   assign LED = {row_select_n[4:0], serial_clk, output_enable_n, latch_enable};
-
+   assign panel_switches = GPIO_1[31:16];
+   assign LED = panel_switches[15:8];
+   
    // TODO: Assign test_panel_select_n to GPIO_1[33]
    assign test_panel_select_n = 1'b0;
    //assign test_panel_select_n = GPIO_1[33];
-   
+
+   sync_async_reset resetter 
+     (.clk(clk), .reset_n(reset_n_raw), .synced_reset_n(reset_n));
+
+   usb_controller usb_cont
+     (.clk(clk),
+      .reset_n(reset_n),
+      .panel_switches(panel_switches),
+      .miso(GPIO_2[10]),
+      .miosio(GPIO_2[7:0]),
+      .sclk(GPIO_2[8]),
+      .ss_n(GPIO_2[9]),
+      .row_data_out(row_data),
+      .row_data_row_addr(row_data_row_addr),
+      .row_data_panel_addr(row_data_panel_addr),
+      .row_data_write_enable(row_data_write_enable));
    
    controller cont
      (.clk(clk), 
       .reset_n(reset_n),
       .test_panel_select_n(test_panel_select_n),
-      .serial_clk(serial_clk), 
-      .latch_enable(latch_enable), 
-      .output_enable_n(output_enable_n),
+      .row_data(row_data),
+      .row_data_row_addr(row_data_row_addr),
+      .row_data_panel_addr(row_data_panel_addr),
+      .row_data_write_enable(row_data_write_enable),  
+      .serial_clk(GPIO_0[0]), 
+      .latch_enable(GPIO_0[1]), 
+      .output_enable_n(GPIO_0[2]),
       // Note that the port numbers here are different from the schematic
       // in order to compensate for the PCB layout placement errors
       .serial_data_out({GPIO_0[27], GPIO_0[26], GPIO_0[11], // Panel 3
                         GPIO_0[25], GPIO_0[24], GPIO_0[10], // Panel 2
                         GPIO_0[16], GPIO_0[19], GPIO_0[9],  // Panel 1
                         GPIO_0[18], GPIO_0[17], GPIO_0[8]}),// Panel 0
-      .row_select_n(row_select_n)
+      .row_select_n(GPIO_1[15:0])
       );
 
 endmodule
