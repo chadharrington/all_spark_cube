@@ -1,4 +1,3 @@
-
 module altera_dual_port_ram_simple
   #(parameter DATA_WIDTH = 8, ADDR_WIDTH = 10)
    (

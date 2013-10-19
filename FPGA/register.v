@@ -3,7 +3,7 @@ module register
    (
     input                  clk,
     input                  reset_n,
-    input      [WIDTH-1:0] d,
+    input [WIDTH-1:0]      d,
     output reg [WIDTH-1:0] q
     );
 

@@ -1,12 +1,13 @@
-module controller
+module led_controller
   (
    input         clk,
    input         reset_n,
    input         test_panel_select_n,
-   input [383:0] row_data,
+   input [31:0]  chunk_data,
+   input [3:0]   chunk_data_addr,
+   input         chunk_data_write_enable,
    input [3:0]   row_data_row_addr,
    input [1:0]   row_data_panel_addr,
-   input         row_data_write_enable,
    output        serial_clk,
    output        latch_enable,
    output        output_enable_n,
@@ -18,12 +19,13 @@ module controller
    wire [18:0]   count;
    wire [6:0]    driver_step;
    wire [7:0]    pwm_time;
-   wire [3:0]    active_row;
+   wire [3:0]    active_row_addr;
    wire [3:0]    panel_select;
+
    
    assign driver_step = {special_mode, count[5:0]};
    assign pwm_time = count[13:6];
-   assign active_row = count[17:14];
+   assign active_row_addr = count[17:14];
    assign special_mode = count[18];
    assign load_led_vals = load & !special_mode;
    assign load_brightness = load & special_mode;
@@ -41,7 +43,7 @@ module controller
      (.addr(row_data_panel_addr), .y(panel_select));
    
    inverting_decoder #(.WIDTH(4)) row_driver_decoder
-     (.addr(active_row), .y_n(row_select_n));
+     (.addr(active_row_addr), .y_n(row_select_n));
 
 
    genvar        i;
@@ -56,9 +58,11 @@ module controller
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),
               .pwm_time(pwm_time),
-              .row_data_in(row_data),
+              .chunk_data(chunk_data),
+              .chunk_data_addr(chunk_data_addr),
+              .chunk_data_write_enable(panel_select[i] & chunk_data_write_enable),
               .row_data_row_addr(row_data_row_addr),
-              .row_data_write_enable(panel_select[i] & row_data_write_enable),
+              .active_row_addr(active_row_addr),
               .serial_data_out({serial_data_out[i*3+2], 
                                 serial_data_out[i*3+1], 
                                 serial_data_out[i*3]}));

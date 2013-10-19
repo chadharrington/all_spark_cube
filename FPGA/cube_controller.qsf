@@ -257,12 +257,15 @@ set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_RO
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
 set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to GPIO_1
+set_global_assignment -name VERILOG_FILE synchronizer.v
+set_global_assignment -name VERILOG_FILE led_controller.v
+set_global_assignment -name VERILOG_FILE register_with_write_enable.v
+set_global_assignment -name VERILOG_FILE register.v
 set_global_assignment -name VERILOG_FILE usb_controller.v
 set_global_assignment -name VERILOG_FILE decoder.v
 set_global_assignment -name VERILOG_FILE test_panel_adapter.v
 set_global_assignment -name VERILOG_FILE synchronous_two_input_multiplexer.v
 set_global_assignment -name VERILOG_FILE cube_controller.v
-set_global_assignment -name VERILOG_FILE controller.v
 set_global_assignment -name SDC_FILE cube_controller.SDC
 set_global_assignment -name VERILOG_FILE rom.v
 set_global_assignment -name VERILOG_FILE sync_async_reset.v

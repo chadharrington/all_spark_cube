@@ -1,34 +1,43 @@
-
 module panel_driver
   (
-   input         clk,
-   input         reset_n,
-   input         test_panel_select_n, 
-   input         shift,
-   input         load_led_vals,
-   input         load_brightness,
-   input [3:0]   active_row,         
-   input [7:0]   pwm_time,
-   input [383:0] row_data_in,
-   input [3:0]   row_data_row_addr,
-   input         row_data_write_enable, 
-   output [2:0]  serial_data_out
+   input        clk,
+   input        reset_n,
+   input        test_panel_select_n, 
+   input        shift,
+   input        load_led_vals,
+   input        load_brightness,
+   input [7:0]  pwm_time,
+   input [31:0] chunk_data,
+   input [3:0]  chunk_data_addr,
+   input        chunk_data_write_enable,
+   input [3:0]  row_data_row_addr,
+   input [3:0]  active_row_addr,
+   output [2:0] serial_data_out
    );
 
-   wire [383:0]  row_data_out;
-   
-   altera_dual_port_ram_simple #(.DATA_WIDTH(384), .ADDR_WIDTH(4)) ram
-     (.clk(clk), 
-      .write_enable(row_data_write_enable),
-      .write_addr(row_data_row_addr),
-      .read_addr(active_row),
-      .data_in(row_data_in),
-      .data_out(row_data_out));
-   
+   wire [15:0]  chunk_select;
+   wire [383:0] row_data;
 
-   genvar       i;
+   decoder #(.WIDTH(4)) chunk_data_addr_decoder
+     (.addr(chunk_data_addr), .y(chunk_select));
+
+   genvar        i;
    generate
-      for (i=0; i<3; i=i+1)
+      for (i=0; i<12; i=i+1)
+        begin : rams
+           altera_dual_port_ram_simple #(.DATA_WIDTH(32), .ADDR_WIDTH(8)) ram
+             (.clk(clk),
+              .write_enable(chunk_select[i] & chunk_data_write_enable),
+              .write_addr({4'h0, row_data_row_addr}),
+              .read_addr({4'h0, active_row_addr}),
+              .data_in(chunk_data),
+              .data_out(row_data[32*i+31:32*i]));
+        end
+   endgenerate
+   
+   genvar        j;
+   generate
+      for (j=0; j<3; j=j+1)
         begin : color_component_drivers
            color_component_driver color_component_driver_instance
              (.clk(clk), 
@@ -38,23 +47,23 @@ module panel_driver
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),
               .pwm_time(pwm_time), 
-              .component_values({row_data_out[383-8*i:376-8*i],
-                                 row_data_out[359-8*i:352-8*i],
-                                 row_data_out[335-8*i:328-8*i],
-                                 row_data_out[311-8*i:304-8*i],
-                                 row_data_out[287-8*i:280-8*i],
-                                 row_data_out[263-8*i:256-8*i],
-                                 row_data_out[239-8*i:232-8*i],
-                                 row_data_out[215-8*i:208-8*i],
-                                 row_data_out[191-8*i:184-8*i],
-                                 row_data_out[167-8*i:160-8*i],
-                                 row_data_out[143-8*i:136-8*i],
-                                 row_data_out[119-8*i:112-8*i],
-                                 row_data_out[95-8*i:88-8*i],
-                                 row_data_out[71-8*i:64-8*i],
-                                 row_data_out[47-8*i:40-8*i],
-                                 row_data_out[23-8*i:16-8*i]}),
-              .serial_data_out(serial_data_out[i]));             
+              .component_values({row_data[383-8*j:376-8*j],
+                                 row_data[359-8*j:352-8*j],
+                                 row_data[335-8*j:328-8*j],
+                                 row_data[311-8*j:304-8*j],
+                                 row_data[287-8*j:280-8*j],
+                                 row_data[263-8*j:256-8*j],
+                                 row_data[239-8*j:232-8*j],
+                                 row_data[215-8*j:208-8*j],
+                                 row_data[191-8*j:184-8*j],
+                                 row_data[167-8*j:160-8*j],
+                                 row_data[143-8*j:136-8*j],
+                                 row_data[119-8*j:112-8*j],
+                                 row_data[95-8*j:88-8*j],
+                                 row_data[71-8*j:64-8*j],
+                                 row_data[47-8*j:40-8*j],
+                                 row_data[23-8*j:16-8*j]}),
+              .serial_data_out(serial_data_out[j]));             
         end
    endgenerate
    
