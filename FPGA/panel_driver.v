@@ -8,8 +8,8 @@ module panel_driver
    input        load_brightness,
    input [7:0]  pwm_time,
    input [31:0] chunk_data,
-   input [3:0]  chunk_data_addr,
-   input        chunk_data_write_enable,
+   input [3:0]  chunk_addr,
+   input        chunk_write_enable,
    input [3:0]  row_data_row_addr,
    input [3:0]  active_row_addr,
    output [2:0] serial_data_out
@@ -18,8 +18,8 @@ module panel_driver
    wire [15:0]  chunk_select;
    wire [383:0] row_data;
 
-   decoder #(.WIDTH(4)) chunk_data_addr_decoder
-     (.addr(chunk_data_addr), .y(chunk_select));
+   decoder #(.WIDTH(4)) chunk_addr_decoder
+     (.addr(chunk_addr), .y(chunk_select));
 
    genvar        i;
    generate
@@ -27,7 +27,7 @@ module panel_driver
         begin : rams
            altera_dual_port_ram_simple #(.DATA_WIDTH(32), .ADDR_WIDTH(8)) ram
              (.clk(clk),
-              .write_enable(chunk_select[i] & chunk_data_write_enable),
+              .write_enable(chunk_select[i] & chunk_write_enable),
               .write_addr({4'h0, row_data_row_addr}),
               .read_addr({4'h0, active_row_addr}),
               .data_in(chunk_data),

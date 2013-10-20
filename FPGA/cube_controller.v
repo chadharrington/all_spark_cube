@@ -55,8 +55,8 @@ module cube_controller
       .rd_n(rd_n),
       .wr_n(wr_n),
       .chunk_data(chunk_data),
-      .chunk_data_addr(chunk_data_addr),
-      .chunk_data_write_enable(chunk_data_write_enable),
+      .chunk_addr(chunk_addr),
+      .chunk_write_enable(chunk_write_enable),
       .row_data_row_addr(row_data_row_addr),
       .row_data_panel_addr(row_data_panel_addr)
       );
@@ -66,8 +66,8 @@ module cube_controller
       .reset_n(reset_n),
       .test_panel_select_n(test_panel_select_n),
       .chunk_data(chunk_data),
-      .chunk_data_addr(chunk_data_addr),
-      .chunk_data_write_enable(chunk_data_write_enable),
+      .chunk_addr(chunk_addr),
+      .chunk_write_enable(chunk_write_enable),
       .row_data_row_addr(row_data_row_addr),
       .row_data_panel_addr(row_data_panel_addr),
       .serial_clk(GPIO_0[0]), 
