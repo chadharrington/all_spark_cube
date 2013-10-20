@@ -13,15 +13,15 @@ module cube_controller
    );
 
    wire         clk, reset_n, reset_n_raw;
-   wire         test_panel_select_n;
+   wire         test_panel_select;
    wire [15:0]  panel_switches_raw;
    wire         rxf_n_raw, txe_n_raw, rd_n, wr_n;
    wire [7:0]   data_bus_raw;
    wire [31:0]  chunk_data;
-   wire [3:0]   chunk_data_addr;
-   wire         chunk_data_write_enable;
-   wire [3:0]   row_data_row_addr;
-   wire [1:0]   row_data_panel_addr;
+   wire [3:0]   chunk_addr;
+   wire         chunk_write_enable;
+   wire [3:0]   row_addr;
+   wire [1:0]   panel_addr;
    
    // Resets are active low, ANDing them provides OR behavior
    assign reset_n_raw = KEY[0] & GPIO_2[11];
@@ -33,15 +33,11 @@ module cube_controller
    assign data_bus_raw = GPIO_2[7:0];
    assign rd_n = GPIO_2[10];
    assign wr_n = GPIO_2[12];
+   assign test_panel_select = SW[0];
    assign LED[0] = !rxf_n_raw;
    assign LED[1] = !txe_n_raw;
    assign LED[7:2] = 6'b000000;
    
-   // TODO: Assign test_panel_select_n to GPIO_1[33]
-   assign test_panel_select_n = 1'b0;
-   //assign test_panel_select_n = GPIO_1[33];
-
-
    sync_async_reset resetter 
      (.clk(clk), .reset_n(reset_n_raw), .synced_reset_n(reset_n));
 
@@ -57,19 +53,19 @@ module cube_controller
       .chunk_data(chunk_data),
       .chunk_addr(chunk_addr),
       .chunk_write_enable(chunk_write_enable),
-      .row_data_row_addr(row_data_row_addr),
-      .row_data_panel_addr(row_data_panel_addr)
+      .row_addr(row_addr),
+      .panel_addr(panel_addr)
       );
    
    led_controller led_cont
      (.clk(clk), 
       .reset_n(reset_n),
-      .test_panel_select_n(test_panel_select_n),
+      .test_panel_select(test_panel_select),
       .chunk_data(chunk_data),
       .chunk_addr(chunk_addr),
       .chunk_write_enable(chunk_write_enable),
-      .row_data_row_addr(row_data_row_addr),
-      .row_data_panel_addr(row_data_panel_addr),
+      .row_addr(row_addr),
+      .panel_addr(panel_addr),
       .serial_clk(GPIO_0[0]), 
       .latch_enable(GPIO_0[1]), 
       .output_enable_n(GPIO_0[2]),

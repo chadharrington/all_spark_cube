@@ -2,12 +2,12 @@ module led_controller
   (
    input         clk,
    input         reset_n,
-   input         test_panel_select_n,
+   input         test_panel_select,
    input [31:0]  chunk_data,
    input [3:0]   chunk_addr,
    input         chunk_write_enable,
-   input [3:0]   row_data_row_addr,
-   input [1:0]   row_data_panel_addr,
+   input [3:0]   row_addr,
+   input [1:0]   panel_addr,
    output        serial_clk,
    output        latch_enable,
    output        output_enable_n,
@@ -40,7 +40,7 @@ module led_controller
      (.clk(clk), .reset_n(reset_n), .count(count));
 
    decoder #(.WIDTH(2)) panel_addr_decoder
-     (.addr(row_data_panel_addr), .y(panel_select));
+     (.addr(panel_addr), .y(panel_select));
    
    inverting_decoder #(.WIDTH(4)) row_driver_decoder
      (.addr(active_row_addr), .y_n(row_select_n));
@@ -53,7 +53,7 @@ module led_controller
            panel_driver panel_driver_instance
              (.clk(clk), 
               .reset_n(reset_n),
-              .test_panel_select_n(test_panel_select_n),
+              .test_panel_select(test_panel_select),
               .shift(shift), 
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),
@@ -61,7 +61,7 @@ module led_controller
               .chunk_data(chunk_data),
               .chunk_addr(chunk_addr),
               .chunk_write_enable(panel_select[i] & chunk_write_enable),
-              .row_data_row_addr(row_data_row_addr),
+              .row_addr(row_addr),
               .active_row_addr(active_row_addr),
               .serial_data_out({serial_data_out[i*3+2], 
                                 serial_data_out[i*3+1], 

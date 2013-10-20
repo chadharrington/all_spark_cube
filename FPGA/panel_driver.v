@@ -2,7 +2,7 @@ module panel_driver
   (
    input        clk,
    input        reset_n,
-   input        test_panel_select_n, 
+   input        test_panel_select, 
    input        shift,
    input        load_led_vals,
    input        load_brightness,
@@ -10,7 +10,7 @@ module panel_driver
    input [31:0] chunk_data,
    input [3:0]  chunk_addr,
    input        chunk_write_enable,
-   input [3:0]  row_data_row_addr,
+   input [3:0]  row_addr,
    input [3:0]  active_row_addr,
    output [2:0] serial_data_out
    );
@@ -28,7 +28,7 @@ module panel_driver
            altera_dual_port_ram_simple #(.DATA_WIDTH(32), .ADDR_WIDTH(8)) ram
              (.clk(clk),
               .write_enable(chunk_select[i] & chunk_write_enable),
-              .write_addr({4'h0, row_data_row_addr}),
+              .write_addr({4'h0, row_addr}),
               .read_addr({4'h0, active_row_addr}),
               .data_in(chunk_data),
               .data_out(row_data[32*i+31:32*i]));
@@ -42,7 +42,7 @@ module panel_driver
            color_component_driver color_component_driver_instance
              (.clk(clk), 
               .reset_n(reset_n),
-              .test_panel_select_n(test_panel_select_n),
+              .test_panel_select(test_panel_select),
               .shift(shift), 
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),

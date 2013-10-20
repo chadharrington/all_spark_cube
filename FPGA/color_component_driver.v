@@ -3,7 +3,7 @@ module color_component_driver
   (
    input         clk,
    input         reset_n,
-   input         test_panel_select_n, 
+   input         test_panel_select, 
    input         shift,
    input         load_led_vals,
    input         load_brightness,
@@ -23,7 +23,7 @@ module color_component_driver
 
    test_panel_adapter tpa
      (.clk(clk),
-      .test_panel_select_n(test_panel_select_n),
+      .test_panel_select(test_panel_select),
       .led_vals_in(pwm_out),
       .led_vals_out(led_vals_out));
    
