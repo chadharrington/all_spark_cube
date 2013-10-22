@@ -22,6 +22,7 @@ module cube_controller
    wire         chunk_write_enable;
    wire [3:0]   row_addr;
    wire [1:0]   panel_addr;
+   wire [4:0]   state_out;
    
    // Resets are active low, ANDing them provides OR behavior
    assign reset_n_raw = KEY[0] & GPIO_2[11];
@@ -34,9 +35,10 @@ module cube_controller
    assign rd_n = GPIO_2[10];
    assign wr_n = GPIO_2[12];
    assign test_panel_select = SW[0];
-   assign LED[0] = !rxf_n_raw;
-   assign LED[1] = !txe_n_raw;
-   assign LED[7:2] = 6'b000000;
+   assign LED[0] = test_panel_select;
+   assign LED[1] = !rxf_n_raw;
+   assign LED[2] = !txe_n_raw;
+   assign LED[7:3] = state_out;
    
    sync_async_reset resetter 
      (.clk(clk), .reset_n(reset_n_raw), .synced_reset_n(reset_n));
@@ -54,7 +56,8 @@ module cube_controller
       .chunk_addr(chunk_addr),
       .chunk_write_enable(chunk_write_enable),
       .row_addr(row_addr),
-      .panel_addr(panel_addr)
+      .panel_addr(panel_addr),
+      .state_out(state)
       );
    
    led_controller led_cont

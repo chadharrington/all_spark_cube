@@ -12,15 +12,17 @@ module usb_controller
    output [3:0]  chunk_addr,
    output        chunk_write_enable,
    output [3:0]  row_addr,
-   output [1:0]  panel_addr
+   output [1:0]  panel_addr,
+   output [4:0]  state
    );
 
    wire          rxf_n, txe_n, panel_select_request, command_write_enable;
    wire [15:0]   panel_switches;
    wire [7:0]    data_bus;
    wire [15:0]   command_select;
-   
 
+   assign chunk_write_enable = command_select[13] & command_write_enable;
+   
    synchronizer #(.WIDTH(16)) panel_sw_sync
      (.clk(clk), .reset_n(reset_n), .in(panel_switches_raw), .out(panel_switches));
    
@@ -36,19 +38,19 @@ module usb_controller
       .rxf_n(rxf_n), 
       .txe_n(txe_n),
       .panel_select_request(panel_select_request),
+      .panel_switches(panel_switches),
+      .data_bus_raw(data_bus_raw),
       .rd_n(rd_n),
       .wr_n(wr_n), 
-      .command_write_enable(command_write_enable),
-      .chunk_write_enable(chunk_write_enable));
-
+      .command_write_enable(command_write_enable));
+   
    decoder #(.WIDTH(4)) command_decoder
      (.addr(data_bus[7:4]), .y(command_select));
-   
 
-   register_with_write_enable #(.WIDTH(4)) panel_sw_command_register
+   register_with_write_enable #(.WIDTH(1)) panel_sw_command_register
      (.clk(clk),
       .reset_n(reset_n),
-      .write_enable(command_select[1] & command_write_enable),
+      .write_enable(command_write_enable),
       .d(command_select[1]),
       .q(panel_select_request));
 
@@ -90,7 +92,7 @@ module usb_controller
 endmodule // usb_controller
 
 /* 
-                    Command Table
+                    PC to FPGA Command Table
  
  data_bus[7:4]  Description                       data_bus[3:0]
  -------------  --------------------------------  --------------------
@@ -107,6 +109,29 @@ endmodule // usb_controller
  10 -           Set nibble 5 of chunk             nibble
  11 -           Set nibble 6 of chunk             nibble
  12 -           Set nibble 7 of chunk             nibble
+ 13 -           Write chunk                       N/A
+ 14 -           Unused / illegal                  N/A
+ 15 -           Unused / illegal                  N/A
+
+ 
+                    FPGA to PC Command Table
+ 
+ data_bus[7:4]  Description                       data_bus[3:0]
+ -------------  --------------------------------  --------------------
+ 0 -            Unused / illegal                  N/A
+ 1 -            Set panel 0 number                panel_switches[3:0]
+ 2 -            Set panel 1 number                panel_switches[7:4]
+ 3 -            Set panel 2 number                panel_switches[11:8]
+ 4 -            Set panel 3 number                panel_switches[15:12]   
+ 5 -            Unused / illegal                  N/A
+ 6 -            Unused / illegal                  N/A
+ 7 -            Unused / illegal                  N/A
+ 8 -            Unused / illegal                  N/A
+ 9 -            Unused / illegal                  N/A
+ 10 -           Unused / illegal                  N/A
+ 10 -           Unused / illegal                  N/A
+ 11 -           Unused / illegal                  N/A
+ 12 -           Unused / illegal                  N/A
  13 -           Unused / illegal                  N/A
  14 -           Unused / illegal                  N/A
  15 -           Unused / illegal                  N/A
