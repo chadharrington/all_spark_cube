@@ -15,8 +15,8 @@ module cube_controller
    wire         clk, reset_n, reset_n_raw;
    wire         test_panel_select;
    wire [15:0]  panel_switches_raw;
-   wire         rxf_n_raw, txe_n_raw, rd_n, wr_n;
-   wire [7:0]   data_bus_raw;
+   wire         rxf_n_raw, txe_n_raw, rd_n, wr_n, data_out_enable;
+   wire [7:0]   data_bus_out;
    wire [31:0]  chunk_data;
    wire [3:0]   chunk_addr;
    wire         chunk_write_enable;
@@ -31,7 +31,7 @@ module cube_controller
    assign panel_switches_raw = GPIO_1[31:16];
    assign rxf_n_raw = GPIO_2[8];
    assign txe_n_raw = GPIO_2[9];
-   assign data_bus_raw = GPIO_2[7:0];
+   assign GPIO_2[7:0] = (data_out_enable) ? data_bus_out : 8'hzz;
    assign rd_n = GPIO_2[10];
    assign wr_n = GPIO_2[12];
    assign test_panel_select = SW[0];
@@ -49,15 +49,17 @@ module cube_controller
       .panel_switches_raw(panel_switches_raw),
       .rxf_n_raw(rxf_n_raw),
       .txe_n_raw(txe_n_raw),
-      .data_bus_raw(data_bus_raw),
+      .data_bus_in_raw(GPIO_2[7:0]),
+      .data_bus_out(data_bus_out),
       .rd_n(rd_n),
       .wr_n(wr_n),
+      .data_out_enable(data_out_enable),
       .chunk_data(chunk_data),
       .chunk_addr(chunk_addr),
       .chunk_write_enable(chunk_write_enable),
       .row_addr(row_addr),
       .panel_addr(panel_addr),
-      .state_out(state)
+      .state_out(state_out)
       );
    
    led_controller led_cont
