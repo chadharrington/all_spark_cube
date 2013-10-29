@@ -18,6 +18,7 @@
 #define MAX_BOARDS 10
 #define NUM_PANELS_PER_BOARD 4
 
+
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef struct 
 {
@@ -94,12 +95,104 @@ void set_fpga_mode(FT_HANDLE board_handle, FPGA_MODE mode)
     }
 }
 
+void set_board_parameters(BOARD_INFO* info) 
+{
+    FT_STATUS retval;
+    
+    retval = FT_SetUSBParameters(info->handle, 64, 64*1024);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_SetUSBParameters failed: %d\n", retval);
+        exit(-1);
+    }
+    retval = FT_SetLatencyTimer(info->handle, 2);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_SetLatencyTimer failed: %d\n", retval);
+        exit(-1);
+    }
+    retval = FT_SetTimeouts(info->handle, 10, 10);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_SetTimeouts failed: %d\n", retval);
+        exit(-1);
+    }
+    retval = FT_Purge(info->handle, FT_PURGE_RX | FT_PURGE_TX);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_Purge failed: %d\n", retval);
+        exit(-1);
+    }
+    set_fpga_mode(info->handle, FPGA_RUN);
+}
+
+void set_panel_info(BOARD_INFO* info) 
+{
+    BYTE data_out = 0x10;  // Request panel selector data command
+    BYTE data_in[4];
+    BYTE command, operand;
+    FT_STATUS retval;
+    DWORD bytes_written = 0;
+    DWORD bytes_available = 0;
+    DWORD bytes_read = 0;
+
+    int i;
+    
+    retval = FT_Write(info->handle, &data_out, 1, &bytes_written);
+    if (retval != FT_OK) {
+        fprintf(stderr, "set_panel_info::FT_Write failed: %d\n", retval);
+        exit(-1);
+    }
+    if (bytes_written != 1) {
+        fprintf(stderr, "set_panel_info::FT_Write returned wrong byte count.");
+        fprintf(stderr, "Expected 1. Returned: %d\n", bytes_written);
+        exit(-1);
+    }
+    while (bytes_available < 4) {
+        retval = FT_GetQueueStatus(info->handle, &bytes_available);
+        printf("bytes_available: %d\n", bytes_available);
+        if (retval != FT_OK) {
+            fprintf(stderr, "set_panel_info::FT_GetQueueStatus failed: %d\n",
+                    retval);
+            exit(-1);
+        }
+    }
+    retval = FT_Read(info->handle, &data_in, 4, &bytes_read);
+    if (retval != FT_OK) {
+        fprintf(stderr, "set_panel_info::FT_Read failed: %d\n", retval);
+        exit(-1);
+    }
+    if (bytes_read != 4) {
+        fprintf(stderr, "set_panel_info::FT_Read returned wrong byte count.");
+        fprintf(stderr, "Expected 4. Returned: %d\n", bytes_written);
+        exit(-1);
+    }
+    for (i=0; i<4; ++i) {
+        command = data_in[i] >> 4;
+        operand = data_in[i] & 0x0f;
+        switch (command) {
+        case 1:
+            info->panel_nums[0] = operand;
+            break;
+        case 2:
+            info->panel_nums[1] = operand;
+            break;
+        case 3:
+            info->panel_nums[2] = operand;
+            break;
+        case 4:
+            info->panel_nums[3] = operand;
+            break;
+        default:
+            fprintf(stderr, "Received invalid command: %d\n", command);
+            exit(-1); 
+        }
+    }
+}
+    
 void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
 {
     FT_STATUS retval;
     DWORD num_devices, i;
     int board_num=0;
     FT_DEVICE_LIST_INFO_NODE* info_array=NULL;
+    BOARD_INFO* info;
 
     for (i=0; i<MAX_BOARDS; ++i) {
         (*board_info_array)[i].handle = NULL;
@@ -144,32 +237,31 @@ void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
 
     for(i=0; i<MAX_BOARDS; ++i) {
         if ((*board_info_array)[i].handle != NULL) {
-            set_fpga_mode((*board_info_array)[i].handle, FPGA_RUN);
+            info = &(*board_info_array)[i];
+            set_board_parameters(info);
+            set_panel_info(info);
         }
     }
     if (info_array != NULL) free(info_array);    
 }
 
-void get_panel_info(BOARD_INFO (*board_info_array)[]) 
-{
-    
-
-}
-
-
 int main() 
 {
     BYTE* shared_mem=NULL;
     BOARD_INFO board_info_array[MAX_BOARDS];
+    int i, j;
 
     shared_mem = get_shared_mem();
     initialize_shared_memory(shared_mem);
     initialize_driver_boards(&board_info_array);
 
-    get_panel_info(&board_info_array);
-    
+    for (i=0; i<4; ++i) {
+        printf("Board %d:\n", i);
+        printf("  handle: %p\n", board_info_array[i].handle);
+        for (j=0; j<4; ++j)
+            printf("  panel_nums[%d]: %d\n", j, board_info_array[i].panel_nums[j]);        
+    }
 
-    
     return 0;
 }
 
