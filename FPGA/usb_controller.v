@@ -27,13 +27,13 @@ module usb_controller
    assign chunk_write_enable = command_select[13] & command_write_enable;
 
    synchronizer #(.WIDTH(16)) panel_sw_sync
-     (.clk(clk), .reset_n(reset_n), .in(panel_switches_raw), .out(panel_switches));
+     (.clk(clk), .in(panel_switches_raw), .out(panel_switches));
 
    synchronizer #(.WIDTH(8)) data_bus_input_sync
-     (.clk(clk), .reset_n(reset_n), .in(data_bus_in_raw), .out(data_bus_in));
+     (.clk(clk), .in(data_bus_in_raw), .out(data_bus_in));
 
    synchronizer #(.WIDTH(2)) rx_tx_sync
-     (.clk(clk), .reset_n(reset_n), .in({rxf_n_raw, txe_n_raw}), .out({rxf_n, txe_n}));
+     (.clk(clk), .in({rxf_n_raw, txe_n_raw}), .out({rxf_n, txe_n}));
 
    usb_sequencer seq
      (.clk(clk), 
