@@ -99,7 +99,8 @@ endmodule // usb_controller
 /* 
                     PC to FPGA Command Table
  
- data_bus_in[7:4]  Description                       data_bus[3:0]
+ Command           Description                       Parameter
+ data_bus_in[7:4]                                    data_bus[3:0]
  ----------------  --------------------------------  --------------------
  0 -               Unused / illegal                  N/A
  1 -               Request panel selector data       N/A
@@ -119,9 +120,11 @@ endmodule // usb_controller
  15 -              Unused / illegal                  N/A
 
  
+ 
                     FPGA to PC Command Table
  
- data_bus_out[7:4]  Description                       data_bus[3:0]
+ Command            Description                       Parameter 
+ data_bus_out[7:4]                                    data_bus[3:0]
  -----------------  --------------------------------  --------------------
  0 -                Unused / illegal                  N/A
  1 -                Set panel 0 number                panel_switches[3:0]
