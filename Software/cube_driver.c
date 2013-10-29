@@ -149,6 +149,14 @@ void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
     }
     if (info_array != NULL) free(info_array);    
 }
+
+void get_panel_info(BOARD_INFO (*board_info_array)[]) 
+{
+    
+
+}
+
+
 int main() 
 {
     BYTE* shared_mem=NULL;
@@ -157,6 +165,9 @@ int main()
     shared_mem = get_shared_mem();
     initialize_shared_memory(shared_mem);
     initialize_driver_boards(&board_info_array);
+
+    get_panel_info(&board_info_array);
+    
 
     
     return 0;
