@@ -1,10 +1,10 @@
 module jk_flipflop
   (
-   input clk,
-   input reset_n,
-   input j,
-   input k
-   output q
+   input      clk,
+   input      reset_n,
+   input      j,
+   input      k,
+   output reg q
    );
 
    always @(posedge clk, negedge reset_n)

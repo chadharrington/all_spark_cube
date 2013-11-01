@@ -167,8 +167,6 @@ void set_panel_info(BOARD_INFO* info)
 
     for (i=0; i<2; ++i) {  // We have to send the command twice, not
                            // sure why.
-        printf("write - i:%d\n", i);
-        
         retval = FT_Write(info->handle, &data_out, 1, &bytes_written);
         if (retval != FT_OK) {
             fprintf(stderr, "set_panel_info::FT_Write failed: %d\n", retval);

@@ -8,6 +8,6 @@ with open('usb_sequencer_states.txt', 'U') as csvfile:
         print ('%s: // %s' % tuple(row[0:2]))
         print '  begin'
         print '     data_out = %s;' % row[2]
-        print "     output_bits = 4'b%s%s%s%s;" % tuple(row[3:7])
+        print "     output_bits = 5'b%s%s%s%s%s;" % tuple(row[3:8])
         print '  end'
 

@@ -20,7 +20,7 @@ module usb_controller
    );
 
    wire          rxf_n, txe_n;
-   wire          command_write_enable;
+   wire          command_write_enable, clear_psr;
    wire [15:0]   panel_switches;
    wire [7:0]    data_bus_in;
    wire [15:0]   command_select;
@@ -48,16 +48,17 @@ module usb_controller
       .wr_n(wr_n),
       .data_out_enable(data_out_enable),
       .command_write_enable(command_write_enable),
+      .clear_psr(clear_psr),
       .state_out(state_out));
    
    decoder #(.WIDTH(4)) command_decoder
      (.addr(data_bus_in[7:4]), .y(command_select));
 
-   register_with_write_enable #(.WIDTH(1)) panel_sw_command_register
+   jk_flipflop panel_select_request_register
      (.clk(clk),
       .reset_n(reset_n),
-      .write_enable(command_write_enable),
-      .d(command_select[1]),
+      .j(command_select[1] & command_write_enable),
+      .k(clear_psr),
       .q(panel_select_request));
 
    register_with_write_enable #(.WIDTH(2)) panel_addr_command_register
