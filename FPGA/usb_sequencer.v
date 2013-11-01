@@ -27,12 +27,12 @@ module usb_sequencer
    // Labeled states
    localparam [4:0] 
      start_read = 5'd0,
-     end_read = 5'd3,
-     start_write = 5'd4,
-     write_p1 = 5'd9,
-     write_p2 = 5'd14,
-     write_p3 = 5'd19,
-     end_write = 5'd24;
+     end_read = 5'd4,
+     start_write = 5'd5,
+     write_p1 = 5'd10,
+     write_p2 = 5'd15,
+     write_p3 = 5'd20,
+     end_write = 5'd25;
 
    // State register
    always @(posedge clk, negedge reset_n)
@@ -102,27 +102,27 @@ module usb_sequencer
          2: // 
            begin
               data_out = 8'hzz;
+              output_bits = 4'b0100;
+           end
+         3: // 
+           begin
+              data_out = 8'hzz;
               output_bits = 4'b0101;
            end
-         3: // end_read
+         4: // end_read
            begin
               data_out = 8'hzz;
               output_bits = 4'b1100;
            end
-         4: // start_write
+         5: // start_write
            begin
               data_out = 8'hzz;
               output_bits = 4'b1100;
-           end
-         5: // 
-           begin
-              data_out = {4'h1, panel_switches[3:0]};
-              output_bits = 4'b1110;
            end
          6: // 
            begin
               data_out = {4'h1, panel_switches[3:0]};
-              output_bits = 4'b1010;
+              output_bits = 4'b1110;
            end
          7: // 
            begin
@@ -132,22 +132,22 @@ module usb_sequencer
          8: // 
            begin
               data_out = {4'h1, panel_switches[3:0]};
-              output_bits = 4'b1110;
+              output_bits = 4'b1010;
            end
-         9: // write_p1
+         9: // 
            begin
               data_out = {4'h1, panel_switches[3:0]};
               output_bits = 4'b1110;
            end
-         10: // 
+         10: // write_p1
            begin
-              data_out = {4'h2, panel_switches[7:4]};
+              data_out = {4'h1, panel_switches[3:0]};
               output_bits = 4'b1110;
            end
          11: // 
            begin
               data_out = {4'h2, panel_switches[7:4]};
-              output_bits = 4'b1010;
+              output_bits = 4'b1110;
            end
          12: // 
            begin
@@ -157,22 +157,22 @@ module usb_sequencer
          13: // 
            begin
               data_out = {4'h2, panel_switches[7:4]};
-              output_bits = 4'b1110;
+              output_bits = 4'b1010;
            end
-         14: // write_p2
+         14: // 
            begin
               data_out = {4'h2, panel_switches[7:4]};
               output_bits = 4'b1110;
            end
-         15: // 
+         15: // write_p2
            begin
-              data_out = {4'h3, panel_switches[11:8]};
+              data_out = {4'h2, panel_switches[7:4]};
               output_bits = 4'b1110;
            end
          16: // 
            begin
               data_out = {4'h3, panel_switches[11:8]};
-              output_bits = 4'b1010;
+              output_bits = 4'b1110;
            end
          17: // 
            begin
@@ -182,22 +182,22 @@ module usb_sequencer
          18: // 
            begin
               data_out = {4'h3, panel_switches[11:8]};
-              output_bits = 4'b1110;
+              output_bits = 4'b1010;
            end
-         19: // write_p3
+         19: // 
            begin
               data_out = {4'h3, panel_switches[11:8]};
               output_bits = 4'b1110;
            end
-         20: // 
+         20: // write_p3
            begin
-              data_out = {4'h4, panel_switches[15:12]};
+              data_out = {4'h3, panel_switches[11:8]};
               output_bits = 4'b1110;
            end
          21: // 
            begin
               data_out = {4'h4, panel_switches[15:12]};
-              output_bits = 4'b1010;
+              output_bits = 4'b1110;
            end
          22: // 
            begin
@@ -207,9 +207,14 @@ module usb_sequencer
          23: // 
            begin
               data_out = {4'h4, panel_switches[15:12]};
+              output_bits = 4'b1010;
+           end
+         24: // 
+           begin
+              data_out = {4'h4, panel_switches[15:12]};
               output_bits = 4'b1110;
            end
-         24: // end_write
+         25: // end_write
            begin
               data_out = {4'h4, panel_switches[15:12]};
               output_bits = 4'b1110;

@@ -15,10 +15,11 @@ module usb_controller
    output        chunk_write_enable,
    output [3:0]  row_addr,
    output [1:0]  panel_addr,
-   output [4:0]  state_out
+   output [4:0]  state_out,
+   output        panel_select_request       
    );
 
-   wire          rxf_n, txe_n, panel_select_request;
+   wire          rxf_n, txe_n;
    wire          command_write_enable;
    wire [15:0]   panel_switches;
    wire [7:0]    data_bus_in;
@@ -97,7 +98,7 @@ module usb_controller
 endmodule // usb_controller
 
 /* 
-                    PC to FPGA Command Table
+ PC to FPGA Command Table
  
  Command           Description                       Parameter
  data_bus_in[7:4]                                    data_bus[3:0]
@@ -121,7 +122,7 @@ endmodule // usb_controller
 
  
  
-                    FPGA to PC Command Table
+ FPGA to PC Command Table
  
  Command            Description                       Parameter 
  data_bus_out[7:4]                                    data_bus[3:0]
@@ -144,4 +145,4 @@ endmodule // usb_controller
  14 -               Unused / illegal                  N/A
  15 -               Unused / illegal                  N/A
 
-  */
+ */
