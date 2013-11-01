@@ -101,7 +101,7 @@ endmodule // usb_controller
 /* 
  PC to FPGA Command Table
  
- Command           Description                       Parameter
+ Command           Description                       Operand
  data_bus_in[7:4]                                    data_bus[3:0]
  ----------------  --------------------------------  --------------------
  0 -               Unused / illegal                  N/A
@@ -125,7 +125,7 @@ endmodule // usb_controller
  
  FPGA to PC Command Table
  
- Command            Description                       Parameter 
+ Command            Description                       Operand 
  data_bus_out[7:4]                                    data_bus[3:0]
  -----------------  --------------------------------  --------------------
  0 -                Unused / illegal                  N/A
