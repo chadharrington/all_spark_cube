@@ -28,7 +28,7 @@ typedef struct
     
     
     
-BYTE* get_shared_mem() 
+BYTE* create_shared_mem() 
 {
     key_t shm_key;
     int shm_id, retval;
@@ -37,7 +37,7 @@ BYTE* get_shared_mem()
     shm_key = ftok(SHM_FILENAME, SHM_ID);
     if (shm_key == -1) {
         fprintf(stderr, "ftok(%s, %d) failed. Errno: %d.\n", 
-               SHM_FILENAME, SHM_ID, errno);
+                SHM_FILENAME, SHM_ID, errno);
         exit(-1);
     }
     
@@ -76,10 +76,18 @@ void initialize_shared_memory(BYTE* shared_mem)
     num_read = fread(shared_mem, 1, SHM_SIZE, init_data_file);
     if (num_read != SHM_SIZE) {
         fprintf(stderr, "fread returned wrong count: %u instead of %u\n", 
-               num_read, SHM_SIZE);
+                num_read, SHM_SIZE);
         exit(-1);
     }
     fclose(init_data_file);
+}
+
+void sleep_ms(int milliseconds) 
+{
+    struct timespec t, r;
+    t.tv_sec = 1;
+    t.tv_nsec = milliseconds * 1000000L;
+    nanosleep(&t , &r) ;
 }
 
 void set_fpga_mode(FT_HANDLE board_handle, FPGA_MODE mode) 
@@ -95,10 +103,33 @@ void set_fpga_mode(FT_HANDLE board_handle, FPGA_MODE mode)
     }
 }
 
+void purge_buffers(FT_HANDLE handle) 
+{
+    FT_STATUS retval;
+
+    retval = FT_ResetDevice(handle);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_ResetDevice failed: %d\n", retval);
+        exit(-1);
+    }
+    do { 
+        retval = FT_StopInTask(handle); 
+    } while (retval != FT_OK); 
+    retval = FT_Purge(handle, FT_PURGE_RX | FT_PURGE_TX);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_Purge failed: %d\n", retval);
+        exit(-1);
+    }
+    do { 
+        retval = FT_RestartInTask(handle); 
+    } while (retval != FT_OK); 
+}
+
 void set_board_parameters(BOARD_INFO* info) 
 {
     FT_STATUS retval;
     
+    purge_buffers(info->handle);
     retval = FT_SetUSBParameters(info->handle, 64, 64*1024);
     if (retval != FT_OK) {
         fprintf(stderr, "FT_SetUSBParameters failed: %d\n", retval);
@@ -109,17 +140,16 @@ void set_board_parameters(BOARD_INFO* info)
         fprintf(stderr, "FT_SetLatencyTimer failed: %d\n", retval);
         exit(-1);
     }
-    retval = FT_SetTimeouts(info->handle, 10, 10);
+    retval = FT_SetTimeouts(info->handle, 10, 5000);
     if (retval != FT_OK) {
         fprintf(stderr, "FT_SetTimeouts failed: %d\n", retval);
         exit(-1);
     }
-    retval = FT_Purge(info->handle, FT_PURGE_RX | FT_PURGE_TX);
-    if (retval != FT_OK) {
-        fprintf(stderr, "FT_Purge failed: %d\n", retval);
-        exit(-1);
-    }
+
+    set_fpga_mode(info->handle, FPGA_RESET);
+    sleep_ms(1);
     set_fpga_mode(info->handle, FPGA_RUN);
+    sleep_ms(1);
 }
 
 void set_panel_info(BOARD_INFO* info) 
@@ -129,24 +159,31 @@ void set_panel_info(BOARD_INFO* info)
     BYTE command, operand;
     FT_STATUS retval;
     DWORD bytes_written = 0;
-    DWORD bytes_available = 0;
+    DWORD bytes_in_rx_queue = 0;
+    DWORD bytes_in_tx_queue = 0;
     DWORD bytes_read = 0;
-
+    DWORD event_status = 0;
     int i;
-    
-    retval = FT_Write(info->handle, &data_out, 1, &bytes_written);
-    if (retval != FT_OK) {
-        fprintf(stderr, "set_panel_info::FT_Write failed: %d\n", retval);
-        exit(-1);
+
+    for (i=0; i<2; ++i) {  // We have to send the command twice, not
+                           // sure why.
+        printf("write - i:%d\n", i);
+        
+        retval = FT_Write(info->handle, &data_out, 1, &bytes_written);
+        if (retval != FT_OK) {
+            fprintf(stderr, "set_panel_info::FT_Write failed: %d\n", retval);
+            exit(-1);
+        }
+        if (bytes_written != 1) {
+            fprintf(stderr, "set_panel_info::FT_Write returned wrong count.");
+            fprintf(stderr, "Expected 1. Returned: %d\n", bytes_written);
+            exit(-1);
+        }
     }
-    if (bytes_written != 1) {
-        fprintf(stderr, "set_panel_info::FT_Write returned wrong byte count.");
-        fprintf(stderr, "Expected 1. Returned: %d\n", bytes_written);
-        exit(-1);
-    }
-    while (bytes_available < 4) {
-        retval = FT_GetQueueStatus(info->handle, &bytes_available);
-        printf("bytes_available: %d\n", bytes_available);
+
+    while (bytes_in_rx_queue < 4) {
+        retval = FT_GetStatus(info->handle, &bytes_in_rx_queue, 
+                              &bytes_in_tx_queue, &event_status);
         if (retval != FT_OK) {
             fprintf(stderr, "set_panel_info::FT_GetQueueStatus failed: %d\n",
                     retval);
@@ -251,11 +288,12 @@ int main()
     BOARD_INFO board_info_array[MAX_BOARDS];
     int i, j;
 
-    shared_mem = get_shared_mem();
+    shared_mem = create_shared_mem();
     initialize_shared_memory(shared_mem);
     initialize_driver_boards(&board_info_array);
 
-    for (i=0; i<4; ++i) {
+    for (i=0; i<MAX_BOARDS; ++i) {
+        if (board_info_array[i].handle == NULL) continue;
         printf("Board %d:\n", i);
         printf("  handle: %p\n", board_info_array[i].handle);
         for (j=0; j<4; ++j)
