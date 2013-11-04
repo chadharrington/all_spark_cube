@@ -1,50 +1,50 @@
 /* 
- PC to FPGA Command Table
+   PC to FPGA Command Table
  
- Command           Description                       Operand
- data_bus_in[7:4]                                    data_bus[3:0]
- ----------------  --------------------------------  --------------------
- 0 -               Unused / illegal                  N/A
- 1 -               Request panel selector data       N/A
- 2 -               Set panel address                 {2'b0, panel_addr}
- 3 -               Set row address                   row_addr
- 4 -               Set chunk address                 chunk_addr
- 5 -               Set nibble 0 of chunk             nibble
- 6 -               Set nibble 1 of chunk             nibble
- 7 -               Set nibble 2 of chunk             nibble
- 8 -               Set nibble 3 of chunk             nibble
- 9 -               Set nibble 4 of chunk             nibble
- 10 -              Set nibble 5 of chunk             nibble
- 11 -              Set nibble 6 of chunk             nibble
- 12 -              Set nibble 7 of chunk             nibble
- 13 -              Write chunk                       N/A
- 14 -              Unused / illegal                  N/A
- 15 -              Unused / illegal                  N/A
+   Command           Description                       Operand
+   data_bus_in[7:4]                                    data_bus[3:0]
+   ----------------  --------------------------------  --------------------
+   0 -               Unused / illegal                  N/A
+   1 -               Request panel selector data       N/A
+   2 -               Set panel address                 {2'b0, panel_addr}
+   3 -               Set row address                   row_addr
+   4 -               Set chunk address                 chunk_addr
+   5 -               Set nibble 0 of chunk             nibble
+   6 -               Set nibble 1 of chunk             nibble
+   7 -               Set nibble 2 of chunk             nibble
+   8 -               Set nibble 3 of chunk             nibble
+   9 -               Set nibble 4 of chunk             nibble
+   10 -              Set nibble 5 of chunk             nibble
+   11 -              Set nibble 6 of chunk             nibble
+   12 -              Set nibble 7 of chunk             nibble
+   13 -              Write chunk                       N/A
+   14 -              Unused / illegal                  N/A
+   15 -              Unused / illegal                  N/A
 
  
  
- FPGA to PC Command Table
+   FPGA to PC Command Table
  
- Command            Description                       Operand 
- data_bus_out[7:4]                                    data_bus[3:0]
- -----------------  --------------------------------  --------------------
- 0 -                Unused / illegal                  N/A
- 1 -                Set panel 0 number                panel_switches[3:0]
- 2 -                Set panel 1 number                panel_switches[7:4]
- 3 -                Set panel 2 number                panel_switches[11:8]
- 4 -                Set panel 3 number                panel_switches[15:12]   
- 5 -                Unused / illegal                  N/A
- 6 -                Unused / illegal                  N/A
- 7 -                Unused / illegal                  N/A
- 8 -                Unused / illegal                  N/A
- 9 -                Unused / illegal                  N/A
- 10 -               Unused / illegal                  N/A
- 10 -               Unused / illegal                  N/A
- 11 -               Unused / illegal                  N/A
- 12 -               Unused / illegal                  N/A
- 13 -               Unused / illegal                  N/A
- 14 -               Unused / illegal                  N/A
- 15 -               Unused / illegal                  N/A
+   Command            Description                       Operand 
+   data_bus_out[7:4]                                    data_bus[3:0]
+   -----------------  --------------------------------  --------------------
+   0 -                Unused / illegal                  N/A
+   1 -                Set panel 0 number                panel_switches[3:0]
+   2 -                Set panel 1 number                panel_switches[7:4]
+   3 -                Set panel 2 number                panel_switches[11:8]
+   4 -                Set panel 3 number                panel_switches[15:12]   
+   5 -                Unused / illegal                  N/A
+   6 -                Unused / illegal                  N/A
+   7 -                Unused / illegal                  N/A
+   8 -                Unused / illegal                  N/A
+   9 -                Unused / illegal                  N/A
+   10 -               Unused / illegal                  N/A
+   10 -               Unused / illegal                  N/A
+   11 -               Unused / illegal                  N/A
+   12 -               Unused / illegal                  N/A
+   13 -               Unused / illegal                  N/A
+   14 -               Unused / illegal                  N/A
+   15 -               Unused / illegal                  N/A
 
 */
 
@@ -54,6 +54,7 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/shm.h>
+#include <time.h>
 
 #include "ftd2xx.h"
 
@@ -66,7 +67,7 @@
 #define INIT_FILE_NAME "/opt/adaptive/cube/initialization.bin"
 #define MAX_BOARDS 10
 #define NUM_PANELS_PER_BOARD 4
-
+#define SEND_BUFFER_SIZE 1000
 
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef struct 
@@ -130,7 +131,7 @@ void sleep_ms(int milliseconds)
     struct timespec t, r;
     t.tv_sec = 1;
     t.tv_nsec = milliseconds * 1000000L;
-    nanosleep(&t , &r) ;
+    nanosleep(&t, &r) ;
 }
 
 void set_fpga_mode(FT_HANDLE board_handle, FPGA_MODE mode) 
@@ -173,7 +174,7 @@ void set_board_parameters(BOARD_INFO* info)
     FT_STATUS retval;
     
     purge_buffers(info->handle);
-    retval = FT_SetUSBParameters(info->handle, 64, 64*1024);
+    retval = FT_SetUSBParameters(info->handle, 64, 0);
     if (retval != FT_OK) {
         fprintf(stderr, "FT_SetUSBParameters failed: %d\n", retval);
         exit(-1);
@@ -183,7 +184,7 @@ void set_board_parameters(BOARD_INFO* info)
         fprintf(stderr, "FT_SetLatencyTimer failed: %d\n", retval);
         exit(-1);
     }
-    retval = FT_SetTimeouts(info->handle, 10, 5000);
+    retval = FT_SetTimeouts(info->handle, 1000, 1000);
     if (retval != FT_OK) {
         fprintf(stderr, "FT_SetTimeouts failed: %d\n", retval);
         exit(-1);
@@ -194,11 +195,14 @@ void set_board_parameters(BOARD_INFO* info)
     sleep_ms(1);
 }
 
-void send_command(FT_HANDLE handle, BYTE command, BYTE operand)
+void send_command_impl(FT_HANDLE handle, BYTE command, BYTE operand,
+                       int send_immediately)
 {
     FT_STATUS retval;
-    DWORD data_out;
+    BYTE data_out;
     DWORD bytes_written;
+    static BYTE send_buffer[SEND_BUFFER_SIZE];
+    static DWORD send_buffer_index=0;
     
     if ((command > 13) || (command < 1)) {
         fprintf(stderr, "Command %d is not a valid command.\n", command);
@@ -209,16 +213,34 @@ void send_command(FT_HANDLE handle, BYTE command, BYTE operand)
         exit(-1);
     }
     data_out = (command << 4) | operand;
-    retval = FT_Write(handle, &data_out, 1, &bytes_written);
-    if (retval != FT_OK) {
-        fprintf(stderr, "send_command::FT_Write failed: %d\n", retval);
-        exit(-1);
+    send_buffer[send_buffer_index++] = data_out;
+    
+    if (send_immediately || send_buffer_index >= SEND_BUFFER_SIZE) {
+        
+        retval = FT_Write(handle, &send_buffer, 
+                          send_buffer_index, &bytes_written);
+        if (retval != FT_OK) {
+            fprintf(stderr, "FT_Write failed: %d\n", retval);
+            exit(-1);
+        }
+        if (bytes_written != send_buffer_index) {
+            fprintf(stderr, "FT_Write returned wrong count. ");
+            fprintf(stderr, "Expected %d. Returned: %d\n", 
+                    send_buffer_index, bytes_written);
+            exit(-1);
+        }
+        send_buffer_index = 0;
     }
-    if (bytes_written != 1) {
-        fprintf(stderr, "send_command::FT_Write returned wrong count. ");
-        fprintf(stderr, "Expected 1. Returned: %d\n", bytes_written);
-        exit(-1);
-    }    
+}
+
+void send_command(FT_HANDLE handle, BYTE command, BYTE operand) 
+{
+    send_command_impl(handle, command, operand, 0);
+}
+
+void send_command_immediately(FT_HANDLE handle, BYTE command, BYTE operand)
+{
+    send_command_impl(handle, command, operand, 1);
 }
 
 void set_panel_info(BOARD_INFO* board_info) 
@@ -237,7 +259,7 @@ void set_panel_info(BOARD_INFO* board_info)
     for (i=0; i<2; ++i) {  
         command = 1; // Request panel selector data command
         operand = 0;
-        send_command(board_info->handle, command, operand);
+        send_command_immediately(board_info->handle, command, operand);
     }
     while (bytes_in_rx_queue < 4) {
         retval = FT_GetStatus(board_info->handle, &bytes_in_rx_queue, 
@@ -369,7 +391,7 @@ void send_row(FT_HANDLE handle, BYTE panel_addr,
     }
 }
 
-void send_panel(FT_HANDLE handle, BYTE panel_addr, BYTE panel_data[768])
+void send_panel(FT_HANDLE handle, BYTE panel_addr, BYTE* panel_data)
 {
     int i;
     
@@ -378,7 +400,7 @@ void send_panel(FT_HANDLE handle, BYTE panel_addr, BYTE panel_data[768])
     }
 }
 
-void send_data_to_boards(BYTE* shared_mem, BOARD_INFO board_info_array[]) 
+void send_data_to_boards(BYTE* shared_mem, BOARD_INFO board_info_array[])
 {
     BYTE i, j, panel;
     FT_HANDLE handle;
@@ -398,14 +420,24 @@ int main()
 {
     BYTE* shared_mem=NULL;
     BOARD_INFO board_info_array[MAX_BOARDS];
+    int i, duration;
+    int reps = 100000;
+    time_t start_time, end_time;
 
     shared_mem = create_shared_mem();
     initialize_shared_memory(shared_mem);
     initialize_driver_boards(&board_info_array);
     print_board_info(board_info_array);
+
     while (1) {
-        send_data_to_boards(shared_mem, board_info_array);
+        time(&start_time);
+        for (i=0; i<reps; ++i) {
+            send_data_to_boards(shared_mem, board_info_array);
+        }
+        time(&end_time);
+        duration = difftime(end_time, start_time);
+        printf("%d frames in %d secs. %.2f fps.\n",
+               reps, duration, (float) reps / (float) duration);
     }
-    
     return 0;
 }
