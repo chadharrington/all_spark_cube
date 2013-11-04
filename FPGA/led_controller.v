@@ -2,7 +2,7 @@ module led_controller
   (
    input         clk,
    input         reset_n,
-   input         test_panel_select,
+   input         test_panel_select_n,
    input [31:0]  chunk_data,
    input [3:0]   chunk_addr,
    input         chunk_write_enable,
@@ -53,7 +53,7 @@ module led_controller
            panel_driver panel_driver_instance
              (.clk(clk), 
               .reset_n(reset_n),
-              .test_panel_select(test_panel_select),
+              .test_panel_select_n(test_panel_select_n),
               .shift(shift), 
               .load_led_vals(load_led_vals), 
               .load_brightness(load_brightness),
