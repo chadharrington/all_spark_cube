@@ -13,7 +13,8 @@ module cube_controller
    );
 
    wire         clk, reset_n, reset_n_raw;
-   wire         test_panel_select_n, panel_select_request;
+   wire         test_panel_select_n, test_panel_select_n_raw;
+   wire         panel_select_request;
    wire [15:0]  panel_switches_raw;
    wire         rxf_n_raw, txe_n_raw, rd_n, wr_n, data_out_enable;
    wire [7:0]   data_bus_out;
@@ -33,7 +34,7 @@ module cube_controller
    assign GPIO_2[7:0] = (data_out_enable) ? data_bus_out : 8'hzz;
    assign GPIO_2[10] = rd_n;
    assign GPIO_2[12] = wr_n;
-   assign test_panel_select_n = SW[0];
+   assign test_panel_select_n_raw = SW[0];
    assign LED[0] = reset_n;
    assign LED[1] = !rxf_n_raw;
    assign LED[2] = !txe_n_raw;
@@ -44,6 +45,9 @@ module cube_controller
    sync_async_reset resetter 
      (.clk(clk), .reset_n(reset_n_raw), .synced_reset_n(reset_n));
 
+   synchronizer #(.WIDTH(1)) tps_sync
+     (.clk(clk), .in(test_panel_select_n_raw), .out(test_panel_select_n));
+   
    usb_controller usb_cont
      (.clk(clk),
       .reset_n(reset_n),
