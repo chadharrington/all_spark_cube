@@ -45,11 +45,11 @@ module usb_controller_testbench;
       #100;
 
       reset_n = 1; // enter run mode
-      data_bus_in_raw = 8'h10;
+      data_bus_in_raw = 8'h23;
       #100;
 
       rxf_n_raw = 0; // indicate data to be read
-      #1000
+      #1000;
       
       $stop;
    end
