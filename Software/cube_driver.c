@@ -1,3 +1,52 @@
+/* 
+ PC to FPGA Command Table
+ 
+ Command           Description                       Operand
+ data_bus_in[7:4]                                    data_bus[3:0]
+ ----------------  --------------------------------  --------------------
+ 0 -               Unused / illegal                  N/A
+ 1 -               Request panel selector data       N/A
+ 2 -               Set panel address                 {2'b0, panel_addr}
+ 3 -               Set row address                   row_addr
+ 4 -               Set chunk address                 chunk_addr
+ 5 -               Set nibble 0 of chunk             nibble
+ 6 -               Set nibble 1 of chunk             nibble
+ 7 -               Set nibble 2 of chunk             nibble
+ 8 -               Set nibble 3 of chunk             nibble
+ 9 -               Set nibble 4 of chunk             nibble
+ 10 -              Set nibble 5 of chunk             nibble
+ 11 -              Set nibble 6 of chunk             nibble
+ 12 -              Set nibble 7 of chunk             nibble
+ 13 -              Write chunk                       N/A
+ 14 -              Unused / illegal                  N/A
+ 15 -              Unused / illegal                  N/A
+
+ 
+ 
+ FPGA to PC Command Table
+ 
+ Command            Description                       Operand 
+ data_bus_out[7:4]                                    data_bus[3:0]
+ -----------------  --------------------------------  --------------------
+ 0 -                Unused / illegal                  N/A
+ 1 -                Set panel 0 number                panel_switches[3:0]
+ 2 -                Set panel 1 number                panel_switches[7:4]
+ 3 -                Set panel 2 number                panel_switches[11:8]
+ 4 -                Set panel 3 number                panel_switches[15:12]   
+ 5 -                Unused / illegal                  N/A
+ 6 -                Unused / illegal                  N/A
+ 7 -                Unused / illegal                  N/A
+ 8 -                Unused / illegal                  N/A
+ 9 -                Unused / illegal                  N/A
+ 10 -               Unused / illegal                  N/A
+ 10 -               Unused / illegal                  N/A
+ 11 -               Unused / illegal                  N/A
+ 12 -               Unused / illegal                  N/A
+ 13 -               Unused / illegal                  N/A
+ 14 -               Unused / illegal                  N/A
+ 15 -               Unused / illegal                  N/A
+
+*/
 
 #include <errno.h>
 #include <stdio.h>
@@ -26,8 +75,6 @@ typedef struct
     BYTE      panel_nums[NUM_PANELS_PER_BOARD];
 } BOARD_INFO;
     
-    
-    
 BYTE* create_shared_mem() 
 {
     key_t shm_key;
@@ -40,19 +87,16 @@ BYTE* create_shared_mem()
                 SHM_FILENAME, SHM_ID, errno);
         exit(-1);
     }
-    
     shm_id = shmget(shm_key, SHM_SIZE, SHM_PERMS | IPC_CREAT);
     if (shm_id == -1) {
         fprintf(stderr, "shmget failed. Errno %d.\n", errno);
         exit(-1);
     }
-    
     shared_mem = shmat(shm_id, (void*) 0, 0);
     if (shared_mem == (void*) -1) {
         fprintf(stderr, "shmat failed. Errno %d.\n", errno);
         exit(-1);
     }
-
     retval = mlock(shared_mem, SHM_SIZE);
     if (retval == -1) {
         fprintf(stderr, "mlock failed. Errno %d.\n", errno);
@@ -72,7 +116,6 @@ void initialize_shared_memory(BYTE* shared_mem)
         fprintf(stderr, "Errno: %d\n", errno);
         exit(-1);
     }
-
     num_read = fread(shared_mem, 1, SHM_SIZE, init_data_file);
     if (num_read != SHM_SIZE) {
         fprintf(stderr, "fread returned wrong count: %u instead of %u\n", 
@@ -145,16 +188,41 @@ void set_board_parameters(BOARD_INFO* info)
         fprintf(stderr, "FT_SetTimeouts failed: %d\n", retval);
         exit(-1);
     }
-
     set_fpga_mode(info->handle, FPGA_RESET);
     sleep_ms(1);
     set_fpga_mode(info->handle, FPGA_RUN);
     sleep_ms(1);
 }
 
-void set_panel_info(BOARD_INFO* info) 
+void send_command(FT_HANDLE handle, BYTE command, BYTE operand)
 {
-    BYTE data_out = 0x10;  // Request panel selector data command
+    FT_STATUS retval;
+    DWORD data_out;
+    DWORD bytes_written;
+    
+    if ((command > 13) || (command < 1)) {
+        fprintf(stderr, "Command %d is not a valid command.\n", command);
+        exit(-1);
+    }
+    if (operand > 15) {
+        fprintf(stderr, "Operand %d is too large.\n", operand);
+        exit(-1);
+    }
+    data_out = (command << 4) | operand;
+    retval = FT_Write(handle, &data_out, 1, &bytes_written);
+    if (retval != FT_OK) {
+        fprintf(stderr, "send_command::FT_Write failed: %d\n", retval);
+        exit(-1);
+    }
+    if (bytes_written != 1) {
+        fprintf(stderr, "send_command::FT_Write returned wrong count. ");
+        fprintf(stderr, "Expected 1. Returned: %d\n", bytes_written);
+        exit(-1);
+    }    
+}
+
+void set_panel_info(BOARD_INFO* board_info) 
+{
     BYTE data_in[4];
     BYTE command, operand;
     FT_STATUS retval;
@@ -165,22 +233,14 @@ void set_panel_info(BOARD_INFO* info)
     DWORD event_status = 0;
     int i;
 
-    for (i=0; i<2; ++i) {  // We have to send the command twice, not
-                           // sure why.
-        retval = FT_Write(info->handle, &data_out, 1, &bytes_written);
-        if (retval != FT_OK) {
-            fprintf(stderr, "set_panel_info::FT_Write failed: %d\n", retval);
-            exit(-1);
-        }
-        if (bytes_written != 1) {
-            fprintf(stderr, "set_panel_info::FT_Write returned wrong count.");
-            fprintf(stderr, "Expected 1. Returned: %d\n", bytes_written);
-            exit(-1);
-        }
+    // We have to send the command twice, not sure why
+    for (i=0; i<2; ++i) {  
+        command = 1; // Request panel selector data command
+        operand = 0;
+        send_command(board_info->handle, command, operand);
     }
-
     while (bytes_in_rx_queue < 4) {
-        retval = FT_GetStatus(info->handle, &bytes_in_rx_queue, 
+        retval = FT_GetStatus(board_info->handle, &bytes_in_rx_queue, 
                               &bytes_in_tx_queue, &event_status);
         if (retval != FT_OK) {
             fprintf(stderr, "set_panel_info::FT_GetQueueStatus failed: %d\n",
@@ -188,7 +248,7 @@ void set_panel_info(BOARD_INFO* info)
             exit(-1);
         }
     }
-    retval = FT_Read(info->handle, &data_in, 4, &bytes_read);
+    retval = FT_Read(board_info->handle, &data_in, 4, &bytes_read);
     if (retval != FT_OK) {
         fprintf(stderr, "set_panel_info::FT_Read failed: %d\n", retval);
         exit(-1);
@@ -201,23 +261,11 @@ void set_panel_info(BOARD_INFO* info)
     for (i=0; i<4; ++i) {
         command = data_in[i] >> 4;
         operand = data_in[i] & 0x0f;
-        switch (command) {
-        case 1:
-            info->panel_nums[0] = operand;
-            break;
-        case 2:
-            info->panel_nums[1] = operand;
-            break;
-        case 3:
-            info->panel_nums[2] = operand;
-            break;
-        case 4:
-            info->panel_nums[3] = operand;
-            break;
-        default:
+        if (command > 4) {
             fprintf(stderr, "Received invalid command: %d\n", command);
             exit(-1); 
         }
+        board_info->panel_nums[command-1] = operand;
     }
 }
     
@@ -232,18 +280,15 @@ void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
     for (i=0; i<MAX_BOARDS; ++i) {
         (*board_info_array)[i].handle = NULL;
     }
-    
     retval = FT_CreateDeviceInfoList(&num_devices);
     if (retval != FT_OK) {
         fprintf(stderr, "FT_CreateDeviceInfoList failed: %d\n", retval);
         exit(-1);
     }
-
     if (num_devices <= 0) {
         fprintf(stderr, "No USB devices found.\n");
         exit(-1);
     }
-    
     info_array = (FT_DEVICE_LIST_INFO_NODE*) malloc(
         sizeof(FT_DEVICE_LIST_INFO_NODE) * num_devices);
     retval = FT_GetDeviceInfoList(info_array, &num_devices);
@@ -251,7 +296,6 @@ void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
         fprintf(stderr, "FT_GetDeviceInfoList failed: %d\n", retval);
         exit(-1);
     }
-
     for (i=0; i<num_devices; ++i) {
         if (strncmp(info_array[i].Description, "Cube Driver Board", 17) == 0) {
             retval = FT_OpenEx(info_array[i].SerialNumber, 
@@ -269,7 +313,6 @@ void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
             }
         }
     }
-
     for(i=0; i<MAX_BOARDS; ++i) {
         if ((*board_info_array)[i].handle != NULL) {
             info = &(*board_info_array)[i];
@@ -280,25 +323,89 @@ void initialize_driver_boards(BOARD_INFO (*board_info_array)[])
     if (info_array != NULL) free(info_array);    
 }
 
-int main() 
+void print_board_info(BOARD_INFO board_info_array[]) 
 {
-    BYTE* shared_mem=NULL;
-    BOARD_INFO board_info_array[MAX_BOARDS];
     int i, j;
-
-    shared_mem = create_shared_mem();
-    initialize_shared_memory(shared_mem);
-    initialize_driver_boards(&board_info_array);
 
     for (i=0; i<MAX_BOARDS; ++i) {
         if (board_info_array[i].handle == NULL) continue;
         printf("Board %d:\n", i);
         printf("  handle: %p\n", board_info_array[i].handle);
         for (j=0; j<4; ++j)
-            printf("  panel_nums[%d]: %d\n", j, board_info_array[i].panel_nums[j]);        
+            printf("  panel_nums[%d]: %d\n", j, 
+                   board_info_array[i].panel_nums[j]);        
     }
-
-    return 0;
 }
 
+void send_chunk(FT_HANDLE handle, BYTE panel_addr, BYTE row_addr, 
+                BYTE chunk_addr, BYTE* chunk_data)
+{
+    int i;
+    BYTE data;
 
+    if (panel_addr > 3) {
+        fprintf(stderr, "Invalid panel address: %u", panel_addr);
+        exit(-1);
+    }
+    send_command(handle, 2, panel_addr); 
+    send_command(handle, 3, row_addr); 
+    send_command(handle, 4, chunk_addr);
+    for (i=0; i<8; ++i) {
+        data = *(chunk_data+(i/2));
+        if (i % 2) data = (data & 0xf0) >> 4;
+        else data = data & 0x0f;
+        send_command(handle, i+5, data); // Send nibbles
+    }
+    send_command(handle, 13, 0);  // Write chunk
+}
+
+void send_row(FT_HANDLE handle, BYTE panel_addr, 
+              BYTE row_addr, BYTE* row_data)
+{
+    int i;
+    
+    for (i=0; i<12; ++i) {
+        send_chunk(handle, panel_addr, row_addr, i, row_data+(i*4));
+    }
+}
+
+void send_panel(FT_HANDLE handle, BYTE panel_addr, BYTE panel_data[768])
+{
+    int i;
+    
+    for(i=0; i<16; ++i) {
+        send_row(handle, panel_addr, i, panel_data+(i*48));
+    }
+}
+
+void send_data_to_boards(BYTE* shared_mem, BOARD_INFO board_info_array[]) 
+{
+    BYTE i, j, panel;
+    FT_HANDLE handle;
+    
+    for (i=0; i<MAX_BOARDS; ++i) {
+        handle = board_info_array[i].handle;
+        if (handle != NULL) {
+            for (j=0; j<4; ++j) {
+                panel = board_info_array[i].panel_nums[j];
+                send_panel(handle, j, shared_mem+(panel*768));
+            }
+        }
+    }
+}
+
+int main() 
+{
+    BYTE* shared_mem=NULL;
+    BOARD_INFO board_info_array[MAX_BOARDS];
+
+    shared_mem = create_shared_mem();
+    initialize_shared_memory(shared_mem);
+    initialize_driver_boards(&board_info_array);
+    print_board_info(board_info_array);
+    while (1) {
+        send_data_to_boards(shared_mem, board_info_array);
+    }
+    
+    return 0;
+}
