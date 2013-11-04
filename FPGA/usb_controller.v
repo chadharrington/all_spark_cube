@@ -1,3 +1,53 @@
+/* 
+ PC to FPGA Command Table
+ 
+ Command           Description                       Operand
+ data_bus_in[7:4]                                    data_bus[3:0]
+ ----------------  --------------------------------  --------------------
+ 0 -               Unused / illegal                  N/A
+ 1 -               Request panel selector data       N/A
+ 2 -               Set panel address                 {2'b0, panel_addr}
+ 3 -               Set row address                   row_addr
+ 4 -               Set chunk address                 chunk_addr
+ 5 -               Set nibble 0 of chunk             nibble
+ 6 -               Set nibble 1 of chunk             nibble
+ 7 -               Set nibble 2 of chunk             nibble
+ 8 -               Set nibble 3 of chunk             nibble
+ 9 -               Set nibble 4 of chunk             nibble
+ 10 -              Set nibble 5 of chunk             nibble
+ 11 -              Set nibble 6 of chunk             nibble
+ 12 -              Set nibble 7 of chunk             nibble
+ 13 -              Write chunk                       N/A
+ 14 -              Unused / illegal                  N/A
+ 15 -              Unused / illegal                  N/A
+
+ 
+ 
+ FPGA to PC Command Table
+ 
+ Command            Description                       Operand 
+ data_bus_out[7:4]                                    data_bus[3:0]
+ -----------------  --------------------------------  --------------------
+ 0 -                Unused / illegal                  N/A
+ 1 -                Set panel 0 number                panel_switches[3:0]
+ 2 -                Set panel 1 number                panel_switches[7:4]
+ 3 -                Set panel 2 number                panel_switches[11:8]
+ 4 -                Set panel 3 number                panel_switches[15:12]   
+ 5 -                Unused / illegal                  N/A
+ 6 -                Unused / illegal                  N/A
+ 7 -                Unused / illegal                  N/A
+ 8 -                Unused / illegal                  N/A
+ 9 -                Unused / illegal                  N/A
+ 10 -               Unused / illegal                  N/A
+ 10 -               Unused / illegal                  N/A
+ 11 -               Unused / illegal                  N/A
+ 12 -               Unused / illegal                  N/A
+ 13 -               Unused / illegal                  N/A
+ 14 -               Unused / illegal                  N/A
+ 15 -               Unused / illegal                  N/A
+
+ */
+
 module usb_controller
   (
    input         clk,
@@ -98,52 +148,4 @@ module usb_controller
 
 endmodule // usb_controller
 
-/* 
- PC to FPGA Command Table
- 
- Command           Description                       Operand
- data_bus_in[7:4]                                    data_bus[3:0]
- ----------------  --------------------------------  --------------------
- 0 -               Unused / illegal                  N/A
- 1 -               Request panel selector data       N/A
- 2 -               Set panel address                 {2'b0, panel_addr}
- 3 -               Set row address                   row_addr
- 4 -               Set chunk address                 chunk_addr
- 5 -               Set nibble 0 of chunk             nibble
- 6 -               Set nibble 1 of chunk             nibble
- 7 -               Set nibble 2 of chunk             nibble
- 8 -               Set nibble 3 of chunk             nibble
- 9 -               Set nibble 4 of chunk             nibble
- 10 -              Set nibble 5 of chunk             nibble
- 11 -              Set nibble 6 of chunk             nibble
- 12 -              Set nibble 7 of chunk             nibble
- 13 -              Write chunk                       N/A
- 14 -              Unused / illegal                  N/A
- 15 -              Unused / illegal                  N/A
 
- 
- 
- FPGA to PC Command Table
- 
- Command            Description                       Operand 
- data_bus_out[7:4]                                    data_bus[3:0]
- -----------------  --------------------------------  --------------------
- 0 -                Unused / illegal                  N/A
- 1 -                Set panel 0 number                panel_switches[3:0]
- 2 -                Set panel 1 number                panel_switches[7:4]
- 3 -                Set panel 2 number                panel_switches[11:8]
- 4 -                Set panel 3 number                panel_switches[15:12]   
- 5 -                Unused / illegal                  N/A
- 6 -                Unused / illegal                  N/A
- 7 -                Unused / illegal                  N/A
- 8 -                Unused / illegal                  N/A
- 9 -                Unused / illegal                  N/A
- 10 -               Unused / illegal                  N/A
- 10 -               Unused / illegal                  N/A
- 11 -               Unused / illegal                  N/A
- 12 -               Unused / illegal                  N/A
- 13 -               Unused / illegal                  N/A
- 14 -               Unused / illegal                  N/A
- 15 -               Unused / illegal                  N/A
-
- */
