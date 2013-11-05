@@ -66,6 +66,8 @@
 #define SHM_ID 1
 #define INIT_FILE_NAME "/opt/adaptive/cube/initialization.bin"
 #define MAX_BOARDS 10
+#define SERIAL_NUM_SIZE 17
+#define DEVICE_DESCRIPTION_SIZE 64
 #define NUM_PANELS_PER_BOARD 4
 #define SEND_BUFFER_SIZE 10000
 
@@ -73,6 +75,7 @@ typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef struct 
 {
     FT_HANDLE handle;
+    BYTE      serial_num[SERIAL_NUM_SIZE];
     BYTE      panel_nums[NUM_PANELS_PER_BOARD];
 } BOARD_INFO;
     
@@ -243,6 +246,26 @@ void send_command_immediately(FT_HANDLE handle, BYTE command, BYTE operand)
     send_command_impl(handle, command, operand, 1);
 }
 
+void set_serial_number(BOARD_INFO* board_info) 
+{
+    FT_STATUS retval;
+    FT_DEVICE device_type;
+    DWORD device_id;
+    char  serial_num[SERIAL_NUM_SIZE];
+    char  device_description[DEVICE_DESCRIPTION_SIZE];
+    int i;
+    
+    retval = FT_GetDeviceInfo(board_info->handle, &device_type, &device_id,
+                              serial_num, device_description, NULL);
+    if (retval != FT_OK) {
+        fprintf(stderr, "FT_GetDeviceInfo failed: %d\n", retval);
+        exit(-1);
+    }
+    for (i=0; i<SERIAL_NUM_SIZE; ++i) {
+        board_info->serial_num[i] = serial_num[i];
+    }
+}
+
 void set_panel_info(BOARD_INFO* board_info) 
 {
     BYTE data_in[4];
@@ -255,6 +278,7 @@ void set_panel_info(BOARD_INFO* board_info)
     DWORD event_status = 0;
     int i;
 
+    set_serial_number(board_info);
     // We have to send the command twice, not sure why
     for (i=0; i<2; ++i) {  
         command = 1; // Request panel selector data command
@@ -353,6 +377,7 @@ void print_board_info(BOARD_INFO board_info_array[])
         if (board_info_array[i].handle == NULL) continue;
         printf("Board %d:\n", i);
         printf("  handle: %p\n", board_info_array[i].handle);
+        printf("  serial num: %s\n", board_info_array[i].serial_num);
         for (j=0; j<4; ++j)
             printf("  panel_nums[%d]: %d\n", j, 
                    board_info_array[i].panel_nums[j]);        
@@ -421,7 +446,7 @@ int main()
     BYTE* shared_mem=NULL;
     BOARD_INFO board_info_array[MAX_BOARDS];
     int i, duration;
-    int reps = 100000;
+    int reps = 10000;
     time_t start_time, end_time;
 
     shared_mem = create_shared_mem();
