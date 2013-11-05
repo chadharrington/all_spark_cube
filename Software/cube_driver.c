@@ -67,7 +67,7 @@
 #define INIT_FILE_NAME "/opt/adaptive/cube/initialization.bin"
 #define MAX_BOARDS 10
 #define NUM_PANELS_PER_BOARD 4
-#define SEND_BUFFER_SIZE 1000
+#define SEND_BUFFER_SIZE 10000
 
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef struct 
