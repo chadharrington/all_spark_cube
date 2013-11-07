@@ -63,9 +63,9 @@ module led_controller
               .chunk_write_enable(panel_select[i] & chunk_write_enable),
               .row_addr(row_addr),
               .active_row_addr(active_row_addr),
-              .serial_data_out({serial_data_out[i*3+2], 
+              .serial_data_out({serial_data_out[i*3], 
                                 serial_data_out[i*3+1], 
-                                serial_data_out[i*3]}));
+                                serial_data_out[i*3+2]}));
         end
    endgenerate
 
