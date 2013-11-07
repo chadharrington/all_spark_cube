@@ -1,29 +1,14 @@
-PROGRAM = cubedriver
-SRCDIRS = .
+PROGRAM = cube_driver
 
 CC = gcc
-CFLAGS = -Wall -Wextra  -O3
+CFLAGS = -Wall -Wextra -O3
 LDFLAGS = -lftd2xx
-
-SOURCES = $(foreach d,$(SRCDIRS),$(wildcard $(addprefix $(d)/*,.c)))
-HEADERS = $(foreach d,$(SRCDIRS),$(wildcard $(addprefix $(d)/*,.h)))
-OBJS    = $(addsuffix .o, $(basename $(SOURCES)))
-DEPS    = $(OBJS:.o=.d)
-
-DEPEND      = $(CC) -MM -MP $(CFLAGS) 
-DEPEND.d    = $(subst -g ,,$(DEPEND))
+SRCS = cube_driver.c
 
 all: $(PROGRAM)
 
-%.d:%.c
-	@echo -n $(dir $<) > $@
-	@$(DEPEND.d) $< >> $@
-
-%.o:%.c
-	@$(CC) $(CFLAGS) -c $< -o $@
-
-$(PROGRAM):$(OBJS)
-	@$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
+cube_driver: $(CDSRCS)
+	@$(CC) $(CFLAGS) $(LDFLAGS) $(SRCS) -o $@
 
 clean:
-	@rm -f $(OBJS) $(PROGRAM) 
+	@rm -f $(PROGRAM) 
