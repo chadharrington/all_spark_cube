@@ -1,2 +1,3 @@
 cube_driver
 gen-py/
+*.pyc
