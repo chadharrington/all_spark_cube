@@ -58,12 +58,11 @@
 
 #include "ftd2xx.h"
 
-#define BYTE unsigned char
-
+#define SHM_KEY 1278899529
 #define SHM_SIZE 12288
 #define SHM_PERMS 0666
-#define SHM_FILENAME "/opt/adaptive/cube/cubememory"
-#define SHM_ID 1
+
+
 #define INIT_FILE_NAME "/opt/adaptive/cube/initialization.bin"
 #define MAX_BOARDS 10
 #define SERIAL_NUM_SIZE 17
@@ -71,6 +70,7 @@
 #define NUM_PANELS_PER_BOARD 4
 #define SEND_BUFFER_SIZE 10000
 
+typedef unsigned char BYTE;
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef struct 
 {
@@ -81,17 +81,10 @@ typedef struct
     
 BYTE* create_shared_mem() 
 {
-    key_t shm_key;
     int shm_id, retval;
     BYTE* shared_mem;
         
-    shm_key = ftok(SHM_FILENAME, SHM_ID);
-    if (shm_key == -1) {
-        fprintf(stderr, "ftok(%s, %d) failed. Errno: %d.\n", 
-                SHM_FILENAME, SHM_ID, errno);
-        exit(-1);
-    }
-    shm_id = shmget(shm_key, SHM_SIZE, SHM_PERMS | IPC_CREAT);
+    shm_id = shmget(SHM_KEY, SHM_SIZE, SHM_PERMS | IPC_CREAT);
     if (shm_id == -1) {
         fprintf(stderr, "shmget failed. Errno %d.\n", errno);
         exit(-1);
@@ -109,7 +102,7 @@ BYTE* create_shared_mem()
     return shared_mem;
 }
 
-void initialize_shared_memory(BYTE* shared_mem)
+void initialize_shared_mem(BYTE* shared_mem)
 {
     FILE* init_data_file;
     unsigned int num_read;
@@ -450,7 +443,7 @@ int main()
     time_t start_time, end_time;
 
     shared_mem = create_shared_mem();
-    initialize_shared_memory(shared_mem);
+    initialize_shared_mem(shared_mem);
     initialize_driver_boards(&board_info_array);
     print_board_info(board_info_array);
 
