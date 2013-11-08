@@ -49,7 +49,15 @@ module usb_controller_testbench;
       #100;
 
       rxf_n_raw = 0; // indicate data to be read
-      #1000;
+      #110;
+      rxf_n_raw = 1;
+      data_bus_in_raw = 8'h40;
+      #70;
+      rxf_n_raw = 0; // indicate data to be read
+      #110;
+      rxf_n_raw = 1;
+      #200
+      
       
       $stop;
    end
