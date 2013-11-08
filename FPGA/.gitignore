@@ -16,3 +16,4 @@ incremental_db
 *.jic
 *.map
 *.qws
+usb_sequencer_states.txt
