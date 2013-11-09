@@ -5,7 +5,7 @@
    data_bus_in[7:4]                                    data_bus[3:0]
    ----------------  --------------------------------  --------------------
    0 -               Unused / illegal                  N/A
-   1 -               Request panel selector data       N/A
+   1 -               Request panel numbers             N/A
    2 -               Set panel address                 {2'b0, panel_addr}
    3 -               Set row address                   row_addr
    4 -               Set chunk address                 chunk_addr
@@ -68,7 +68,7 @@
 #define SERIAL_NUM_SIZE 17
 #define DEVICE_DESCRIPTION_SIZE 64
 #define NUM_PANELS_PER_BOARD 4
-#define SEND_BUFFER_SIZE 10000
+#define SEND_BUFFER_SIZE 100000
 
 typedef unsigned char BYTE;
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
