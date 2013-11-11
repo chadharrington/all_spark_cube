@@ -1,12 +1,11 @@
-
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 
-from cube import CubeInterface
+from all_spark_cube import CubeInterface
 
 
-class CubeClient(object):
+class AllSparkCubeClient(object):
     def __init__(self, host, port):
         socket = TSocket.TSocket(host, port)
         self.transport = TTransport.TBufferedTransport(socket)

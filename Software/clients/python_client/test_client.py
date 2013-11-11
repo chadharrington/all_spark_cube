@@ -4,7 +4,7 @@ from itertools import chain
 from random import randint
 import time
 
-from cube_client import CubeClient
+from all_spark_cube_client import AllSparkCubeClient
 
 #HOST='10.0.1.100'
 HOST='localhost'

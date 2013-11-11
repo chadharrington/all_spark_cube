@@ -8,13 +8,13 @@ use strict;
 use warnings;
 use Thrift;
 
-use cube::Types;
+use AllSparkCube::Types;
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-package cube::CubeInterface_set_data_args;
+package AllSparkCube::CubeInterface_set_data_args;
 use base qw(Class::Accessor);
-cube::CubeInterface_set_data_args->mk_accessors( qw( index data ) );
+AllSparkCube::CubeInterface_set_data_args->mk_accessors( qw( index data ) );
 
 sub new {
   my $classname = shift;
@@ -112,7 +112,7 @@ sub write {
   return $xfer;
 }
 
-package cube::CubeInterface_set_data_result;
+package AllSparkCube::CubeInterface_set_data_result;
 use base qw(Class::Accessor);
 
 sub new {
@@ -158,7 +158,7 @@ sub write {
   return $xfer;
 }
 
-package cube::CubeInterfaceIf;
+package AllSparkCube::CubeInterfaceIf;
 
 use strict;
 
@@ -171,7 +171,7 @@ sub set_data{
   die 'implement interface';
 }
 
-package cube::CubeInterfaceRest;
+package AllSparkCube::CubeInterfaceRest;
 
 use strict;
 
@@ -191,10 +191,10 @@ sub set_data{
   return $self->{impl}->set_data($index, $data);
 }
 
-package cube::CubeInterfaceClient;
+package AllSparkCube::CubeInterfaceClient;
 
 
-use base qw(cube::CubeInterfaceIf);
+use base qw(AllSparkCube::CubeInterfaceIf);
 sub new {
   my ($classname, $input, $output) = @_;
   my $self      = {};
@@ -218,14 +218,14 @@ sub send_set_data{
   my $data = shift;
 
   $self->{output}->writeMessageBegin('set_data', TMessageType::CALL, $self->{seqid});
-  my $args = new cube::CubeInterface_set_data_args();
+  my $args = new AllSparkCube::CubeInterface_set_data_args();
   $args->{index} = $index;
   $args->{data} = $data;
   $args->write($self->{output});
   $self->{output}->writeMessageEnd();
   $self->{output}->getTransport()->flush();
 }
-package cube::CubeInterfaceProcessor;
+package AllSparkCube::CubeInterfaceProcessor;
 
 use strict;
 
@@ -261,7 +261,7 @@ sub process {
 
 sub process_set_data {
     my ($self, $seqid, $input, $output) = @_;
-    my $args = new cube::CubeInterface_set_data_args();
+    my $args = new AllSparkCube::CubeInterface_set_data_args();
     $args->read($input);
     $input->readMessageEnd();
     $self->{handler}->set_data($args->index, $args->data);

@@ -1,9 +1,5 @@
-namespace py cube
-namespace c_glib cube
-namespace perl cube
-namespace cpp cube
-namespace java com.adaptivecomputing.cube
-namespace php cube
+namespace py all_spark_cube
+namespace perl AllSparkCube
 
 
 service CubeInterface {

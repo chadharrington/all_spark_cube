@@ -1,7 +1,7 @@
-package CubeClient;
+package AllSparkCubeClient;
 
 use lib 'gen-perl';
-use cube::CubeInterface;
+use AllSparkCube::CubeInterface;
 use Thrift::Socket;
 use Thrift::BufferedTransport;
 use Thrift::BinaryProtocol;
@@ -18,7 +18,7 @@ sub new {
     $self->{socket} = Thrift::Socket->new($self->{'host'}, $self->{'port'});
     $self->{transport} = Thrift::BufferedTransport->new($self->{socket});
     $self->{protocol} = Thrift::BinaryProtocol->new($self->{transport});
-    $self->{client} = cube::CubeInterfaceClient->new($self->{protocol});
+    $self->{client} = AllSparkCube::CubeInterfaceClient->new($self->{protocol});
     $self->{transport}->open();
     
     return $self;
