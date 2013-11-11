@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from itertools import chain
-import random
+from random import randint
 import time
 
 from cube_client import CubeClient
@@ -12,9 +12,11 @@ PORT=12345
 
 
 def main():
-    data = [random.randint(0, 255) for x in range(4096 * 3)]
+    data = [(255, 255, 255)
+             for x in range(4096)]
+    data = list(chain.from_iterable(data))
     client = CubeClient(HOST, PORT)
-    reps = 1000
+    reps = 100
     begin = time.clock()
     for i in range(reps):
         client.set_data(0, data)

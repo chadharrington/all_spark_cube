@@ -14,22 +14,21 @@ module color_component_driver
 
    wire [7:0]    brightness;
    wire [15:0]   brightness_extended;
-   wire [15:0]   pwm_out;
+   wire [15:0]   out;
    wire [15:0]   led_vals_out;
    
 
    assign brightness = 8'hff; //TODO: Replace with host-defined brightness
    assign brightness_extended = {8'h00, brightness};
 
-   test_panel_adapter tpa
-     (.clk(clk),
-      .test_panel_select_n(test_panel_select_n),
-      .led_vals_in(pwm_out),
-      .led_vals_out(led_vals_out));
-   
+   // Odd & even columns are switched on the cube panels
    piso_shift_register #(.WIDTH(16)) sr
      (.clk(clk), .reset_n(reset_n),
-      .par_in_a(led_vals_out), .par_in_b(brightness_extended), 
+      .par_in_a({out[1], out[0], out[3], out[2],
+                 out[5], out[4], out[7], out[6], 
+                 out[9], out[8], out[11], out[10],
+                 out[13], out[12], out[15], out[14]}),
+      .par_in_b(brightness_extended), 
       .load_a(load_led_vals), .load_b(load_brightness), 
       .shift(shift), .ser_out(serial_data_out));
 
@@ -38,7 +37,7 @@ module color_component_driver
    generate
       for (i=0; i<16; i=i+1)
         begin : comparator
-           assign pwm_out[i] = pwm_time < component_values[8*i+7:8*i];
+           assign out[i] = pwm_time < component_values[8*i+7:8*i];
         end
    endgenerate
    

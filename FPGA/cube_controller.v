@@ -86,7 +86,12 @@ module cube_controller
                         GPIO_0[25], GPIO_0[24], GPIO_0[10], // Panel 2
                         GPIO_0[16], GPIO_0[19], GPIO_0[9],  // Panel 1
                         GPIO_0[18], GPIO_0[17], GPIO_0[8]}),// Panel 0
-      .row_select_n(GPIO_1[15:0])
-      );
+      // Panels have odd & even reversed, top & bottom reversed
+      .row_select_n({GPIO_1[1], GPIO_1[0], GPIO_1[3], GPIO_1[2],
+                     GPIO_1[5], GPIO_1[4], GPIO_1[7], GPIO_1[6],
+                     GPIO_1[9], GPIO_1[8], GPIO_1[11], GPIO_1[10],
+                     GPIO_1[13], GPIO_1[12], GPIO_1[15], GPIO_1[14]}));
 
 endmodule // cube_controller
+
+

@@ -17,12 +17,8 @@ module panel_driver
 
    wire [15:0]  chunk_select;
    wire [383:0] row_data;
-   wire [3:0]   row_addr_xlated;
 
-   // Adapt the row address if test panel is selected
-   assign row_addr_xlated = {row_addr[3] ^~ test_panel_select_n, 
-                             row_addr[2:0]};
-
+   
    decoder #(.WIDTH(4)) chunk_addr_decoder
      (.addr(chunk_addr), .y(chunk_select));
 
@@ -33,7 +29,7 @@ module panel_driver
            altera_dual_port_ram_simple #(.DATA_WIDTH(32), .ADDR_WIDTH(8)) ram
              (.clk(clk),
               .write_enable(chunk_select[i] & chunk_write_enable),
-              .write_addr({4'h0, row_addr_xlated}),
+              .write_addr({4'h0, row_addr}),
               .read_addr({4'h0, active_row_addr}),
               .data_in(chunk_data),
               .data_out(row_data[32*i+31:32*i]));

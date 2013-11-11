@@ -10,8 +10,8 @@ class CubeClient(object):
     def __init__(self, host, port):
         socket = TSocket.TSocket(host, port)
         self.transport = TTransport.TBufferedTransport(socket)
-        protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
-        self.client = CubeInterface.Client(protocol)
+        self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
+        self.client = CubeInterface.Client(self.protocol)
         self.transport.open()        
 
     def __del__(self):
