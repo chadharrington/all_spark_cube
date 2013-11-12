@@ -8,13 +8,14 @@ THRIFT_DIRNAME = gen-perl
 SRCS = $(SRC_DIR)/AllSparkCubeClient.pm $(SRC_DIR)/client_demo.pl
 
 client: $(SRCS) clean
+	@mkdir -p $(DIST_DIR)
 	@cp -R ../../thrift/$(THRIFT_DIRNAME) $(SRC_DIR)
 	@mkdir -p $(DIST_DIR)
-	@tar -pczf $(DIST_DIR)/$(PKG_NAME) $(SRC_DIR)
+	@tar -czf $(DIST_DIR)/$(PKG_NAME) $(SRC_DIR)
 
 clean:
 	@-rm -f $(ARTIFACT)
 	@-rm -rf $(SRC_DIR)/$(THRIFT_DIRNAME)
 
 
-.PHONY: clean
+.PHONY: clean client
