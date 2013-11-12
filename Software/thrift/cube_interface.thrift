@@ -1,4 +1,3 @@
-namespace py all_spark_cube
 namespace perl AllSparkCube
 
 

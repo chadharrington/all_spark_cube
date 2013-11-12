@@ -1,23 +1,15 @@
-DRIVER = cube_driver
-DRIVER_SRCS = cube_driver.c
-THRIFT_STUBS = gen-py
-THRIFT_SRCS = cube_interface.thrift 
-
-LDFLAGS = -lftd2xx
-CFLAGS = -Wall -Wextra -O3
-CC = gcc
-THRIFT_COMPILER = thrift
-THRIFT_COMPILER_FLAGS = -gen py:new_style
+PROJECTS = thrift clients server
 
 
-all: $(DRIVER) $(THRIFT_STUBS)
+projects: $(PROJECTS)
+clients: thrift
+server: thrift
 
-$(DRIVER): $(DRIVER_SRCS)
-	@$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-
-$(THRIFT_STUBS): $(THRIFT_SRCS)
-	@$(THRIFT_COMPILER) $(THRIFT_COMPILER_FLAGS) $^
+$(PROJECTS):
+	@$(MAKE) -C $@
 
 clean:
-	@rm -f $(DRIVER) 
-	@rm -rf $(THRIFT_STUBS)
+	@-for p in $(PROJECTS); do ($(MAKE) -C $$p clean ); done
+
+.PHONY: projects $(PROJECTS) clean
+
