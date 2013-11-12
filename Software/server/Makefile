@@ -1,7 +1,7 @@
 NAME = cube_server
 
 server:
-	@echo "TODO make server"
+	cp -R ../thrift/gen-py .
 
 clean:
 	@echo "TODO clean server"
