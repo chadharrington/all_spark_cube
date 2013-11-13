@@ -15,28 +15,24 @@ module led_controller
    output [15:0] row_select_n
    );
 
-   wire          load, load_led_vals, load_brightness, shift, special_mode;
-   wire [18:0]   count;
+   wire          load, load_led_vals, load_brightness, shift;
+   wire [17:0]   count;
    wire [6:0]    driver_step;
    wire [7:0]    pwm_time;
    wire [3:0]    active_row_addr;
    wire [3:0]    panel_select;
 
    
-   assign driver_step = {special_mode, count[5:0]};
+   assign driver_step = count[5:0];
    assign pwm_time = count[13:6];
    assign active_row_addr = count[17:14];
-   assign special_mode = count[18];
-   assign load_led_vals = load & !special_mode;
-   assign load_brightness = load & special_mode;
 
    rom control_rom
      (.clk(clk), .reset_n(reset_n), .addr(driver_step),
       .load(load), .shift(shift), .sclk(serial_clk), 
       .output_enable_n(output_enable_n), .latch_enable(latch_enable));
 
-   // Reset the counter after the special mode is run (2**18+2**6)
-   binary_counter #(.N(19), .MAX_COUNT(2**18+2**6)) counter
+   binary_counter #(.N(18), .MAX_COUNT(2**18-1)) counter
      (.clk(clk), .reset_n(reset_n), .count(count));
 
    decoder #(.WIDTH(2)) panel_addr_decoder
@@ -55,8 +51,8 @@ module led_controller
               .reset_n(reset_n),
               .test_panel_select_n(test_panel_select_n),
               .shift(shift), 
-              .load_led_vals(load_led_vals), 
-              .load_brightness(load_brightness),
+              .load_led_vals(load), 
+              .load_brightness(1'b0), // not using brightness
               .pwm_time(pwm_time),
               .chunk_data(chunk_data),
               .chunk_addr(chunk_addr),
