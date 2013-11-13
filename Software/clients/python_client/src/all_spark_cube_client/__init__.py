@@ -8,7 +8,7 @@ from thrift.transport import TTransport
 from cube_interface import CubeInterface
 
 
-class AllSparkCubeClient(object):
+class CubeClient(object):
     def __init__(self, host, port):
         socket = TSocket.TSocket(host, port)
         self.transport = TTransport.TBufferedTransport(socket)

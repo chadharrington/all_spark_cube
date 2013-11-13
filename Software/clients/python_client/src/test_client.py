@@ -7,9 +7,19 @@ import time
 from all_spark_cube_client import CubeClient
 
 
-HOST='10.0.1.100'
+HOST='192.168.0.100'
 PORT=12345
 
+def make_red_voxel(panel, row, col, data):
+    pos = (256*panel + 16*row + col) * 3
+    data[pos+1] = 0
+    data[pos+2] = 0
+    
+def make_mono_color_frame(color):
+    rows = [color for x in range(4096)]
+    data = list(chain.from_iterable(rows))
+    return data
+    
 
 def main():
 
@@ -29,10 +39,16 @@ def main():
 
     client = CubeClient(HOST, PORT)
 
-    frames = 100
+    frames = 0
     begin = time.clock()
-    for i in range(frames):
-        client.set_data(0, data)
+    for panel in range(16):
+        for row in range(16):
+            print 'panel %d, row %d' % (panel, row)
+            for col in range(16):
+                data = make_mono_color_frame(white)
+                make_red_voxel(panel, row, col, data)
+                client.set_data(0, data)
+                frames += 1
     end = time.clock()
     duration = end - begin
     print "%d frames in %f secs. %f fps." % (frames, duration, frames / duration)
