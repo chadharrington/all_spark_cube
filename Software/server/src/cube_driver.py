@@ -13,6 +13,7 @@ NUM_COLS = 16
 ROW_SIZE = NUM_COLS * BYTES_PER_VOXEL
 PANEL_SIZE = NUM_ROWS * ROW_SIZE
 CHUNK_SIZE = 4
+NUM_PANELS_PER_BOARD = 4
 NUM_CHUNKS_PER_ROW = ROW_SIZE / CHUNK_SIZE
 NUM_NIBBLES_PER_CHUNK = CHUNK_SIZE * 2
 FPGA_RESET = 0 
@@ -156,8 +157,9 @@ class CubeDriver(object):
 
     def send_frame_data(self):
         for board in self.cube_boards:
-            for board_panel, frame_panel in enumerate(board.panel_nums):
-                board.send_panel_data(board_panel, frame_panel * PANEL_SIZE)
+            for port_num in range(NUM_PANELS_PER_BOARD):
+                board.send_panel_data(port_num, 
+                                      board.panel_nums[port_num] * PANEL_SIZE)
 
     def run(self):
         while True:
@@ -166,6 +168,7 @@ class CubeDriver(object):
 
 
 def main():
+    print 'Driver starting...'
     cube_driver = CubeDriver()
     cube_driver.run()
 

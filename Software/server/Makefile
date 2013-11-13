@@ -9,13 +9,14 @@ THRIFT_DIRNAME = gen-py
 
 server: clean
 	@mkdir -p {$(DIST_DIR),$(TAR_DIR)}
+	@cp -R ../thrift/$(THRIFT_DIRNAME) $(SRC_DIR)
 	@cp -R $(SRC_DIR)/ $(TAR_DIR)
-	@cp -R ../thrift/$(THRIFT_DIRNAME) $(TAR_DIR)
 	@tar -czf  $(DIST_DIR)/$(PKG_NAME) -C $(BUILD_DIR) .
 
 
 clean:
 	@-rm -rf $(DIST_DIR) $(BUILD_DIR)
+	@-rm -rf $(SRC_DIR)/$(THRIFT_DIRNAME)
         # remove .pyc files to prepare clean tarball
 	@find . -name "*.pyc" -print0 | xargs -0 rm -rf
 
