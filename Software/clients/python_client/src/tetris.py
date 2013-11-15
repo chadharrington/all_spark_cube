@@ -59,6 +59,48 @@ class Shape(object):
                       for t in range(self.thickness)
                       for x, y in translated_xy_points]
 
+class IBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (0,3), (0,4),
+                                            (1,4), (1,3), (1,2), (1,1), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
+class JBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (1,3),
+                                            (2,3), (2,2), (2,1), (2,0), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
+class LBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (0,3), (1,3),
+                                            (1,2), (1,1), (2,1), (2,0), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
+class OBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (1,2), (2,2),
+                                            (2,1), (2,0), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
+class SBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (2,2),
+                                            (3,2), (3,1), (2,1), (2,0), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
+class TBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (2,2),
+                                            (2,1), (3,1), (3,0), (2,0), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
+class ZBlock(Shape):
+    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (-1,1), (-1,2), (0,2),
+                                            (1,2), (1,1), (2,1), (2,0), (1,0)]]
+        Shape.__init__(self, points, thickness, position, angle, color)
+
 
 class Frame(object):
     def __init__(self, x_size=X_SIZE, y_size=Y_SIZE, z_size=Z_SIZE):
@@ -100,16 +142,14 @@ class Frame(object):
         
 
 def main():
-    i_points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (0,3), (0,4),
-                                          (1,0), (1,1), (1,2), (1,3), (1,4)]]
     frame = Frame()
-    i_block = Shape(i_points, position=XYZPoint(1, 1, 0), angle=90)
-    frame.add_shape(i_block)
-    for y in range(15, 0, -1):
+    block = JBlock(position=XYZPoint(4, 0, 0), color=red)
+    frame.add_shape(block)
+    for y in range(15, -1, -1):
         print y
-        i_block.position.y = y
+        block.position.y = y
         frame.display()
-        time.sleep(0.8)
+        time.sleep(0.4)
 
 
 if __name__ == '__main__':
