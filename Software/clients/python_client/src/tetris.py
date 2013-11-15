@@ -59,14 +59,24 @@ class Shape(object):
                       for t in range(self.thickness)
                       for x, y in translated_xy_points]
 
-class IBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (0,3), (0,4),
-                                            (1,4), (1,3), (1,2), (1,1), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
+    def make_move(self, move):
+        if move == 0:
+            self.position.y = self.position.y - 1
+        elif move == 1:
+            self.position.x = self.position.x + 1
+        elif move == 2:
+            self.position.x = self.position.x - 1
+        elif move == 3:
+            self.angle = self.angle + 90
+        elif move == 4:
+            self.angle = self.angle - 90
+        else:
+            raise Exception('Illegal move: %d' % move)
 
-class JBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
+s = 10
+
+shapes = {'I': [(0,0), (0,1), (0,2), (0,3), (0,4),                                                   (1,4), (1,3), (1,2), (1,1), (1,0)],
+          'J':     def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
         points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (1,3),
                                             (2,3), (2,2), (2,1), (2,0), (1,0)]]
         Shape.__init__(self, points, thickness, position, angle, color)
@@ -139,17 +149,18 @@ class Frame(object):
             self.render(shape)
         self.client.set_data(0, flatten(self.buffer))
 
-        
 
 def main():
     frame = Frame()
-    block = JBlock(position=XYZPoint(4, 0, 0), color=red)
-    frame.add_shape(block)
-    for y in range(15, -1, -1):
-        print y
-        block.position.y = y
-        frame.display()
-        time.sleep(0.4)
+    paths = [(JBlock, orange, (0, 0, 3, 2, 2, 0, 2, 2, 0, 2, 0, 0, 0)),
+            (SBlock, cyan, (0, 0, 0, 4, 0, 2, 2, 0, 2, 0, 0, 0, 0))]
+    for block_class, color, moves in paths:
+        block = block_class(position=XYZPoint(6, 15, 0), color=color)
+        frame.add_shape(block)
+        for move in moves:
+            block.make_move(move)
+            frame.display()
+            time.sleep(0.4)
 
 
 if __name__ == '__main__':
