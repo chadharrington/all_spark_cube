@@ -12,7 +12,7 @@ X_SIZE = 16
 Y_SIZE = 16
 Z_SIZE = 16
 
-
+'''
 BLOCK_SHAPES = {
     'I': [(0,0), (0,1), (0,2), (0,3), (0,4),         
           (1,4), (1,3), (1,2), (1,1), (1,0)],
@@ -28,7 +28,21 @@ BLOCK_SHAPES = {
           (2,1), (3,1), (3,0), (2,0), (1,0)],
     'Z': [(0,0), (0,1), (-1,1), (-1,2), (0,2),
           (1,2), (1,1), (2,1), (2,0), (1,0)]}
+'''
 
+BLOCK_SHAPES = {
+    'I': (cyan, [(x, y) for x in range(3) for y in range(9)]),
+    'J': (blue, [(x, y) for x in range(5) for y in range(3)] + \
+         [(x, y) for x in range(2, 5) for y in range(2, 7)]),
+    'L': (orange, [(x, y) for x in range(5) for y in range(3)] + \
+         [(x, y) for x in range(3) for y in range(2, 7)]),
+    'O': (light_yellow, [(x, y) for x in range(5) for y in range(5)]),
+    'S': (green, [(x, y) for x in range(5) for y in range(3)] + \
+         [(x, y) for x in range(2, 7) for y in range(2, 5)]),
+    'T': (magenta, [(x, y) for x in range(7) for y in range(3)] + \
+         [(x, y) for x in range(2, 5) for y in range(2, 5)]),
+    'Z': (red, [(x, y) for x in range(5) for y in range(3)] + \
+         [(x, y) for x in range(-2, 3) for y in range(2, 5)])}
 
 def flatten(l):
     return list(chain.from_iterable(l))
@@ -54,8 +68,8 @@ class XYZPoint(object):
 
 
 class Shape(object):
-    def __init__(self, xy_points, thickness=2, position=XYZPoint(), angle=0,
-                 color=white):
+    def __init__(self, xy_points, color=white, thickness=2, 
+                 position=XYZPoint(), angle=0):
         self.xy_points = xy_points
         self.thickness = thickness
         self.position = position
@@ -129,18 +143,27 @@ class Frame(object):
             self.render(shape)
         self.client.set_data(0, flatten(self.buffer))
 
-paths = [('J', orange, (0, 0, 3, 2, 2, 0, 2, 2, 0, 2,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 2)),
-         ('S', cyan, (0, 0, 0, 0, 0, 0, 0, 4, 2, 0, 0, 
-                      0, 0, 0, 0, 0, 0))]
+paths = [('J', (0, 0, 3, 2, 2, 0, 2, 2, 0, 2,
+                0, 0, 0, 0, 0, 0, 0, 2)),
+         ('S', (0, 0, 0, 0, 0, 0, 1, 1, 0, 4, 0, 0, 
+                0, 0, 1, 0, 0, 0, 0)),
+         ('T', (0, 0, 0, 0, 1, 1, 1, 4, 0, 0, 
+                0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0)),
+         ('O', (0, 0, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0)),
+         ('J', (0, 0, 0, 1, 1, 0, 4, 0, 2, 1, 1, 1, 0, 0, 
+                0, 0, 1,  0)),
+         ('I', (0, 0, 4, 1, 1, 0, 0, 1, 0)),
+         ('S', (0, 0, 1, 4, 1, 1, 1, 1, 1, 1, 2, 1, 0, 0, 1, 0, 0, 0)),
+         ('L', (0, 4, 1, 2, 0)),
+]
 
 
 def main():
     frame = Frame()
-    for shape, color, moves in paths:
-        points = [XYPoint(x, y) for x, y in BLOCK_SHAPES[shape]]
-        block = Shape(xy_points=points, position=XYZPoint(6, 15, 0), 
-                      color=color)
+    for shape, moves in paths:
+        color, points = BLOCK_SHAPES[shape]
+        block = Shape(xy_points=[XYPoint(x, y) for x, y in points],
+                      position=XYZPoint(6, 15, 0), color=color)
         frame.add_shape(block)
         for move in moves:
             block.make_move(move)
@@ -150,4 +173,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
