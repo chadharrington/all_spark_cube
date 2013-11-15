@@ -158,7 +158,7 @@ paths = [('J', (0, 0, 3, 2, 2, 0, 2, 2, 0, 2,
 ]
 
 
-def main():
+def play_tetris():
     frame = Frame()
     for shape, moves in paths:
         color, points = BLOCK_SHAPES[shape]
@@ -169,6 +169,11 @@ def main():
             block.make_move(move)
             frame.display()
             time.sleep(0.1)
+
+def main():
+    while True:
+        play_tetris()
+        time.sleep(30)
 
 
 if __name__ == '__main__':
