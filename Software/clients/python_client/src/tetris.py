@@ -13,8 +13,26 @@ Y_SIZE = 16
 Z_SIZE = 16
 
 
+BLOCK_SHAPES = {
+    'I': [(0,0), (0,1), (0,2), (0,3), (0,4),         
+          (1,4), (1,3), (1,2), (1,1), (1,0)],
+    'J': [(0,0), (0,1), (1,1), (1,2), (1,3),
+          (2,3), (2,2), (2,1), (2,0), (1,0)],
+    'L': [(0,0), (0,1), (0,2), (0,3), (1,3),
+          (1,2), (1,1), (2,1), (2,0), (1,0)],
+    'O': [(0,0), (0,1), (0,2), (1,2), (2,2),
+          (2,1), (2,0), (1,0)],
+    'S': [(0,0), (0,1), (1,1), (1,2), (2,2),
+          (3,2), (3,1), (2,1), (2,0), (1,0)],
+    'T': [(0,0), (0,1), (1,1), (1,2), (2,2),
+          (2,1), (3,1), (3,0), (2,0), (1,0)],
+    'Z': [(0,0), (0,1), (-1,1), (-1,2), (0,2),
+          (1,2), (1,1), (2,1), (2,0), (1,0)]}
+
+
 def flatten(l):
     return list(chain.from_iterable(l))
+
 
 class XYPoint(object):
     def __init__(self, x=0, y=0):
@@ -60,56 +78,18 @@ class Shape(object):
                       for x, y in translated_xy_points]
 
     def make_move(self, move):
-        if move == 0:
+        if move == 0:           # down
             self.position.y = self.position.y - 1
-        elif move == 1:
+        elif move == 1:         # right
             self.position.x = self.position.x + 1
-        elif move == 2:
+        elif move == 2:         # left
             self.position.x = self.position.x - 1
-        elif move == 3:
+        elif move == 3:         # cw rotation
             self.angle = self.angle + 90
-        elif move == 4:
+        elif move == 4:         # ccw rotation
             self.angle = self.angle - 90
         else:
             raise Exception('Illegal move: %d' % move)
-
-s = 10
-
-shapes = {'I': [(0,0), (0,1), (0,2), (0,3), (0,4),                                                   (1,4), (1,3), (1,2), (1,1), (1,0)],
-          'J':     def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (1,3),
-                                            (2,3), (2,2), (2,1), (2,0), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
-
-class LBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (0,3), (1,3),
-                                            (1,2), (1,1), (2,1), (2,0), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
-
-class OBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (0,2), (1,2), (2,2),
-                                            (2,1), (2,0), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
-
-class SBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (2,2),
-                                            (3,2), (3,1), (2,1), (2,0), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
-
-class TBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (1,1), (1,2), (2,2),
-                                            (2,1), (3,1), (3,0), (2,0), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
-
-class ZBlock(Shape):
-    def __init__(self, thickness=2, position=XYZPoint(), angle=0, color=white):
-        points = [XYPoint(x,y) for x, y in [(0,0), (0,1), (-1,1), (-1,2), (0,2),
-                                            (1,2), (1,1), (2,1), (2,0), (1,0)]]
-        Shape.__init__(self, points, thickness, position, angle, color)
 
 
 class Frame(object):
@@ -149,18 +129,23 @@ class Frame(object):
             self.render(shape)
         self.client.set_data(0, flatten(self.buffer))
 
+paths = [('J', orange, (0, 0, 3, 2, 2, 0, 2, 2, 0, 2,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 2)),
+         ('S', cyan, (0, 0, 0, 0, 0, 0, 0, 4, 2, 0, 0, 
+                      0, 0, 0, 0, 0, 0))]
+
 
 def main():
     frame = Frame()
-    paths = [(JBlock, orange, (0, 0, 3, 2, 2, 0, 2, 2, 0, 2, 0, 0, 0)),
-            (SBlock, cyan, (0, 0, 0, 4, 0, 2, 2, 0, 2, 0, 0, 0, 0))]
-    for block_class, color, moves in paths:
-        block = block_class(position=XYZPoint(6, 15, 0), color=color)
+    for shape, color, moves in paths:
+        points = [XYPoint(x, y) for x, y in BLOCK_SHAPES[shape]]
+        block = Shape(xy_points=points, position=XYZPoint(6, 15, 0), 
+                      color=color)
         frame.add_shape(block)
         for move in moves:
             block.make_move(move)
             frame.display()
-            time.sleep(0.4)
+            time.sleep(0.1)
 
 
 if __name__ == '__main__':
