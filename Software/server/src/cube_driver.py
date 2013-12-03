@@ -1,6 +1,7 @@
 from ctypes import byref, create_string_buffer, c_ubyte
 from itertools import chain
 import sys
+import threading
 import time
 
 import pylibftdi
@@ -71,14 +72,21 @@ SEND_BUFFER_LIMIT = 1000
 class USBError(Exception): pass
 
 class CubeBoard(object):
-    def __init__(self, serial_num, shared_mem):
+    def __init__(self, serial_num):
         self.serial_num = serial_num
-        self.shmem = shared_mem
+        self.shmaddr = get_shared_memory(perms=0444)
+        data_type = c_ubyte * SHM_SIZE
+        self.shmem = data_type.from_address(self.shmaddr)
         self.send_buffer = []
         self.device = pylibftdi.Device(serial_num)
         self.device.flush()
         self.set_fpga_mode(FPGA_RUN)
         self.set_panel_nums()
+        print "Serial #:", self.serial_num
+        print "Panel #s:", self.panel_nums
+
+    def __del__(self):
+        detach_shared_memory(self.shmaddr)
 
     def set_fpga_mode(self, mode):
         self.device.ftdi_fn.ftdi_set_bitmode(0x10 | mode, 0x20)
@@ -135,42 +143,29 @@ class CubeBoard(object):
         for row in range(NUM_ROWS):
             self.send_row_data(panel, row, frame_index + row * ROW_SIZE)
         
-
-class CubeDriver(object):
-    def __init__(self):
-        self.shmaddr = get_shared_memory(perms=0444)
-        data_type = c_ubyte * SHM_SIZE
-        self.shmem = data_type.from_address(self.shmaddr)
-        self.initialize_cube_boards()
-
-    def __del__(self):
-        detach_shared_memory(self.shmaddr)
-
-    def initialize_cube_boards(self):
-        self.driver = pylibftdi.Driver()
-        devices = self.driver.list_devices()
-        self.cube_boards = [CubeBoard(d[2], self.shmem) for d in devices
-                            if d[1] == "Cube Driver Board" ]
-        for board in self.cube_boards:
-            print "Serial #:", board.serial_num
-            print "Panel #s:", board.panel_nums
-
-    def send_frame_data(self):
-        for board in self.cube_boards:
-            for port_num in range(NUM_PANELS_PER_BOARD):
-                board.send_panel_data(port_num, 
-                                      board.panel_nums[port_num] * PANEL_SIZE)
-
     def run(self):
+        reps = 300
         while True:
-            self.send_frame_data()
-
+            start = time.clock()
+            for rep in range(reps):
+                for port_num in range(NUM_PANELS_PER_BOARD):
+                    self.send_panel_data(
+                        port_num, self.panel_nums[port_num] * PANEL_SIZE)
+            end = time.clock()
+            duration = end - start
+            print '%s: %d frames in %.2f secs. %.2f fps' % \
+                (self.serial_num, reps, duration, reps / duration)
 
 
 def main():
     print 'Driver starting...'
-    cube_driver = CubeDriver()
-    cube_driver.run()
+    devices = pylibftdi.Driver().list_devices()
+    board_serial_nums= [d[2] for d in devices
+                        if d[1] == "Cube Driver Board" ]
+    for board_serial_num in board_serial_nums:
+        threading.Thread(group=None, 
+                         target=CubeBoard(board_serial_num).run).start()
+        
 
 if __name__ == '__main__':
     main()
