@@ -5,30 +5,12 @@ import time
 from all_spark_cube_client import CubeClient
 from colors import *
 
-HOST='192.168.0.100'
+HOST='10.0.1.100'
 PORT=12345
 
 X_SIZE = 16
 Y_SIZE = 16
 Z_SIZE = 16
-
-'''
-BLOCK_SHAPES = {
-    'I': [(0,0), (0,1), (0,2), (0,3), (0,4),         
-          (1,4), (1,3), (1,2), (1,1), (1,0)],
-    'J': [(0,0), (0,1), (1,1), (1,2), (1,3),
-          (2,3), (2,2), (2,1), (2,0), (1,0)],
-    'L': [(0,0), (0,1), (0,2), (0,3), (1,3),
-          (1,2), (1,1), (2,1), (2,0), (1,0)],
-    'O': [(0,0), (0,1), (0,2), (1,2), (2,2),
-          (2,1), (2,0), (1,0)],
-    'S': [(0,0), (0,1), (1,1), (1,2), (2,2),
-          (3,2), (3,1), (2,1), (2,0), (1,0)],
-    'T': [(0,0), (0,1), (1,1), (1,2), (2,2),
-          (2,1), (3,1), (3,0), (2,0), (1,0)],
-    'Z': [(0,0), (0,1), (-1,1), (-1,2), (0,2),
-          (1,2), (1,1), (2,1), (2,0), (1,0)]}
-'''
 
 BLOCK_SHAPES = {
     'I': (cyan, [(x, y) for x in range(3) for y in range(9)]),
@@ -111,6 +93,8 @@ class Frame(object):
         self.x_size = x_size
         self.y_size = y_size
         self.z_size = z_size
+        self.frame_count = 0
+        self.reps = 100
         self.fill_buffer(black)
         self.shapes = []
         self.client = CubeClient(HOST, PORT)
@@ -141,7 +125,16 @@ class Frame(object):
         self.fill_buffer(black)
         for shape in self.shapes:
             self.render(shape)
+        if self.frame_count == 0:
+            self.start_time = time.time()
         self.client.set_data(0, flatten(self.buffer))
+        self.frame_count += 1
+        if self.frame_count == self.reps:
+            duration = time.time() - self.start_time
+            print '%d frames in %.2f secs. %.2f fps.' % (
+                self.reps, duration, self.reps / float(duration))
+            self.frame_count = 0
+
 
 paths = [('J', (0, 0, 3, 2, 2, 0, 2, 2, 0, 2,
                 0, 0, 0, 0, 0, 0, 0, 2)),
@@ -168,12 +161,12 @@ def play_tetris():
         for move in moves:
             block.make_move(move)
             frame.display()
-            time.sleep(0.1)
+            time.sleep(0.2)
+
 
 def main():
     while True:
         play_tetris()
-        time.sleep(30)
 
 
 if __name__ == '__main__':
