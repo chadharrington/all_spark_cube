@@ -73,22 +73,23 @@
 #define NUM_BYTES_PER_PANEL NUM_ROWS * NUM_BYTES_PER_ROW
 #define NUM_CHUNKS_PER_ROW NUM_BYTES_PER_ROW / NUM_BYTES_PER_CHUNK
 #define SEND_BUFFER_SIZE 10000
-#define READ_BUFFER_SIZE NUM_PANELS_PER_BOARD
+#define READ_BUFFER_SIZE 1
 
 /* FTDI Constants */
-#define SERIAL_SIZE 17
+#define SERIAL_NUM_SIZE 17
 #define DESCRIPTION_STRING "Cube Driver Board"
 #define DESCRIPTION_SIZE 64
 #define MANUFACTURER_SIZE 64
-#define VENDOR_ID 0403
-#define PRODUCT_ID 6014
+#define VENDOR_ID 0x403
+#define PRODUCT_ID 0x6014
 
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef unsigned char BYTE;
 typedef struct ftdi_context handle_t;
 typedef struct 
 {
-    handle_t*  handle;
+    handle_t   handle;
+    char       serial_num[SERIAL_NUM_SIZE];
     BYTE       panel_nums[NUM_PANELS_PER_BOARD];
 } board_t;
 
@@ -142,21 +143,21 @@ void set_fpga_mode(board_t* board, int mode)
 {
     int ret;
     
-    ret = ftdi_set_bitmode(board->handle, 0x10 | mode, BITMODE_CBUS);
+    ret = ftdi_set_bitmode(&(board->handle), 0x10 | mode, BITMODE_CBUS);
     if (ret != 0) 
-        exit_with_error(board->handle, "ftdi_set_bitmode", ret);
-    ret = ftdi_set_bitmode(board->handle, 0, BITMODE_RESET);
+        exit_with_error(&(board->handle), "ftdi_set_bitmode", ret);
+    ret = ftdi_set_bitmode(&(board->handle), 0, BITMODE_RESET);
     if (ret != 0) 
-        exit_with_error(board->handle, "ftdi_set_bitmode", ret);
+        exit_with_error(&(board->handle), "ftdi_set_bitmode", ret);
 }
 
 
 void set_chunk_size(board_t* board, int chunk_size) 
 {
     int ret;
-    ret = ftdi_write_data_set_chunksize(board->handle, chunk_size);
+    ret = ftdi_write_data_set_chunksize(&(board->handle), chunk_size);
     if (ret != 0)
-        exit_with_error(board->handle, 
+        exit_with_error(&(board->handle), 
                         "ftdi_write_data_set_chunksize", ret);
 }
 
@@ -165,8 +166,8 @@ void send_command_impl(board_t* board, BYTE command, BYTE operand,
                        BYTE send_immediately)
 {
     int ret;
-    BYTE send_buf;
-    int buflen = 1;
+    BYTE send_buf[SEND_BUFFER_SIZE];
+    int buflen = 0;
     
     if ((command > 13) || (command < 1)) {
         fprintf(stderr, "Command %d is not a valid command.\n", command);
@@ -176,18 +177,14 @@ void send_command_impl(board_t* board, BYTE command, BYTE operand,
         fprintf(stderr, "Operand %d is too large.\n", operand);
         exit(-1);
     }
-    send_buf = (command << 4) | operand;
-    if (send_immediately)
-        set_chunk_size(board, 1); // for immediate write
-    ret = ftdi_write_data(board->handle, &send_buf, buflen);
+    send_buf[buflen++] = (command << 4) | operand;
+    ret = ftdi_write_data(&(board->handle), send_buf, buflen);
     if (ret != buflen) {
         fprintf(stderr, "ftdi_write_data returned wrong count. ");
         fprintf(stderr, "Expected %d. Returned: %d\n", 
                 buflen, ret);
         exit(-1);
     }
-    if (send_immediately)
-        set_chunk_size(board, SEND_BUFFER_SIZE); // restore buffer size
 }
 
 
@@ -209,27 +206,31 @@ void set_panel_nums(board_t* board)
     BYTE command, operand;
     BYTE read_buf[READ_BUFFER_SIZE];
     
-    ret = ftdi_read_data_set_chunksize(board->handle, READ_BUFFER_SIZE);
-    if (ret != 0) 
-        exit_with_error(board->handle, "ftdi_read_data_set_chunksize", ret);
     send_command_immediately(board, 1, 0); // Command 1 is Request Panel Nums
-    
-    ret = ftdi_read_data(board->handle, read_buf, READ_BUFFER_SIZE);
-    if (ret != READ_BUFFER_SIZE) {
-        fprintf(stderr, "ftdi_read_data returned wrong count. ");
-        fprintf(stderr, "Expected %d. Returned: %d\n", READ_BUFFER_SIZE, ret);
-        exit(-1);
-    }
 
+    printf("Board %s panels: [", board->serial_num);
     for (i=0; i<NUM_PANELS_PER_BOARD; ++i) {
-        command = read_buf[i] >> 4;
-        operand = read_buf[i] & 0x0f;
+        while (1) {
+            ret = ftdi_read_data(&(board->handle), read_buf, READ_BUFFER_SIZE);
+            if (ret < 0) 
+                exit_with_error(&(board->handle), "ftdi_read_data", ret);
+            if (ret == 1)
+                break;
+        }
+        
+        command = read_buf[0] >> 4;
+        operand = read_buf[0] & 0x0f;
         if (command > 4) {
             fprintf(stderr, "Received invalid command: %d\n", command);
             exit(-1); 
         }
+        printf("%d", operand);
+        if (i < NUM_PANELS_PER_BOARD - 1) {
+            printf(", ");
+        }
         board->panel_nums[command-1] = operand;
     }
+    printf("]\n");
 }
 
 
@@ -243,14 +244,16 @@ void open_board(board_t* board, char* serial_num)
                              serial_num);
     if (ret != 0) 
         exit_with_error(&handle, "ftdi_usb_open_desc", ret);
-    board->handle = &handle;
-    ret = ftdi_usb_purge_buffers(board->handle);
+    board->handle = handle;
+    strncpy(board->serial_num, serial_num, SERIAL_NUM_SIZE);
+    ret = ftdi_usb_purge_buffers(&(board->handle));
     if (ret != 0) 
-        exit_with_error(board->handle, "ftdi_usb_purge_buffers", ret);
+        exit_with_error(&(board->handle), "ftdi_usb_purge_buffers", ret);
+    set_fpga_mode(board, FPGA_RESET);
     set_fpga_mode(board, FPGA_RUN);
-    ret = ftdi_set_latency_timer(board->handle, 1);
+    ret = ftdi_set_latency_timer(&(board->handle), 1);
     if (ret != 0)
-        exit_with_error(board->handle, "ftdi_set_latency_timer", ret);
+        exit_with_error(&(board->handle), "ftdi_set_latency_timer", ret);
     set_panel_nums(board);
 }
 
@@ -307,7 +310,6 @@ void send_board_data(board_t* board, BYTE* shmem)
         send_panel_data(board, port_num, 
                         shmem+(panel_num*NUM_BYTES_PER_PANEL));
     }
-    
 }
 
 
@@ -319,7 +321,7 @@ float timeval_to_float(struct timeval* t)
 
 void* manage_board(void* serial_num)
 {
-    int reps = 300;
+    int reps = 30;
     int i;
     struct timeval start, end;
     struct timezone tzp;
@@ -343,14 +345,14 @@ void* manage_board(void* serial_num)
 }
 
 
-int detect_boards(char serial_nums[][SERIAL_SIZE]) 
+int detect_boards(char serial_nums[][SERIAL_NUM_SIZE]) 
 {
     int i, board_num, ret;
     handle_t handle;
     struct ftdi_device_list *devlist, *curdev;
     char description[DESCRIPTION_SIZE];
     char manufacturer[MANUFACTURER_SIZE];
-    char serial[SERIAL_SIZE];
+    char serial_num[SERIAL_NUM_SIZE];
 
     init_handle(&handle);
     
@@ -362,14 +364,13 @@ int detect_boards(char serial_nums[][SERIAL_SIZE])
     board_num = 0;
     for (curdev = devlist; curdev != NULL; i++)
     {
-        printf("Checking device: %d\n", i);
         ret = ftdi_usb_get_strings(
             &handle, curdev->dev, manufacturer, MANUFACTURER_SIZE, 
-            description, DESCRIPTION_SIZE, serial, SERIAL_SIZE);
+            description, DESCRIPTION_SIZE, serial_num, SERIAL_NUM_SIZE);
         if (ret < 0)
             exit_with_error(&handle, "ftdi_usb_get_strings", ret);
         if (strncmp(description, DESCRIPTION_STRING, DESCRIPTION_SIZE) == 0) {
-            strncpy(serial_nums[board_num++], serial, SERIAL_SIZE);
+            strncpy(serial_nums[board_num++], serial_num, SERIAL_NUM_SIZE);
         }
         curdev = curdev->next;
     }
@@ -385,13 +386,12 @@ int detect_boards(char serial_nums[][SERIAL_SIZE])
     return board_num;
 }
 
-void run_driver_threads(char serial_nums[][SERIAL_SIZE], int num_boards)
+void run_driver_threads(char serial_nums[][SERIAL_NUM_SIZE], int num_boards)
 {
     int i;
     pthread_t threads[MAX_BOARDS];
     
     for (i=0; i<num_boards; ++i) {
-        /* printf("%s\n", serial_nums[i]); */
         pthread_create(&threads[i], NULL, &manage_board, &serial_nums[i]);
     }
     for (i=0; i<num_boards; ++i) {
@@ -401,11 +401,12 @@ void run_driver_threads(char serial_nums[][SERIAL_SIZE], int num_boards)
 
 int main()
 {
-    char serial_nums[MAX_BOARDS][SERIAL_SIZE];
+    char serial_nums[MAX_BOARDS][SERIAL_NUM_SIZE];
     int num_boards;
     
     printf("Driver starting...\n");
     num_boards = detect_boards(serial_nums);
+    printf("%d boards detected\n", num_boards);
     run_driver_threads(serial_nums, num_boards);
 }
 
