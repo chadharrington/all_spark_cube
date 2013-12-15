@@ -85,12 +85,16 @@
 
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
 typedef unsigned char BYTE;
-typedef struct ftdi_context handle_t;
+typedef struct ftdi_context context;
 typedef struct 
 {
-    handle_t   handle;
-    char       serial_num[SERIAL_NUM_SIZE];
-    BYTE       panel_nums[NUM_PANELS_PER_BOARD];
+    context     device_context;
+    context*    handle;
+    char        serial_num[SERIAL_NUM_SIZE];
+    BYTE        panel_nums[NUM_PANELS_PER_BOARD];
+    BYTE        send_buffer[SEND_BUFFER_SIZE];
+    int         send_buffer_index;
+    BYTE*       shmem;
 } board_t;
 
 
@@ -118,7 +122,7 @@ BYTE* create_shared_mem()
 }
 
 
-void exit_with_error(handle_t* handle, char* func_name, int val) 
+void exit_with_error(context* handle, char* func_name, int val) 
 {
     fprintf(stderr, "%s failed:%d (%s)\n", func_name,
             val, ftdi_get_error_string(handle));
@@ -127,7 +131,7 @@ void exit_with_error(handle_t* handle, char* func_name, int val)
 }
         
 
-void init_handle(handle_t* handle)
+void init_handle(context* handle)
 {
     int ret;
     
@@ -143,31 +147,43 @@ void set_fpga_mode(board_t* board, int mode)
 {
     int ret;
     
-    ret = ftdi_set_bitmode(&(board->handle), 0x10 | mode, BITMODE_CBUS);
+    ret = ftdi_set_bitmode(board->handle, 0x10 | mode, BITMODE_CBUS);
     if (ret != 0) 
-        exit_with_error(&(board->handle), "ftdi_set_bitmode", ret);
-    ret = ftdi_set_bitmode(&(board->handle), 0, BITMODE_RESET);
+        exit_with_error(board->handle, "ftdi_set_bitmode", ret);
+    ret = ftdi_set_bitmode(board->handle, 0, BITMODE_RESET);
     if (ret != 0) 
-        exit_with_error(&(board->handle), "ftdi_set_bitmode", ret);
+        exit_with_error(board->handle, "ftdi_set_bitmode", ret);
 }
 
 
 void set_chunk_size(board_t* board, int chunk_size) 
 {
     int ret;
-    ret = ftdi_write_data_set_chunksize(&(board->handle), chunk_size);
+    ret = ftdi_write_data_set_chunksize(board->handle, chunk_size);
     if (ret != 0)
-        exit_with_error(&(board->handle), 
+        exit_with_error(board->handle, 
                         "ftdi_write_data_set_chunksize", ret);
+}
+
+void send_buffer(board_t* board) 
+{
+    int ret;
+    
+    ret = ftdi_write_data(board->handle, board->send_buffer, 
+                          board->send_buffer_index);
+    if (ret != board->send_buffer_index) {
+        fprintf(stderr, "ftdi_write_data returned wrong count. ");
+        fprintf(stderr, "Expected %d. Returned: %d\n", 
+                board->send_buffer_index, ret);
+        exit(-1);
+    }
+    board->send_buffer_index = 0;
 }
 
 
 void send_command_impl(board_t* board, BYTE command, BYTE operand, 
                        BYTE send_immediately)
 {
-    int ret;
-    BYTE send_buf[SEND_BUFFER_SIZE];
-    int buflen = 0;
     
     if ((command > 13) || (command < 1)) {
         fprintf(stderr, "Command %d is not a valid command.\n", command);
@@ -177,13 +193,9 @@ void send_command_impl(board_t* board, BYTE command, BYTE operand,
         fprintf(stderr, "Operand %d is too large.\n", operand);
         exit(-1);
     }
-    send_buf[buflen++] = (command << 4) | operand;
-    ret = ftdi_write_data(&(board->handle), send_buf, buflen);
-    if (ret != buflen) {
-        fprintf(stderr, "ftdi_write_data returned wrong count. ");
-        fprintf(stderr, "Expected %d. Returned: %d\n", 
-                buflen, ret);
-        exit(-1);
+    board->send_buffer[board->send_buffer_index++] = (command << 4) | operand;
+    if (send_immediately || board->send_buffer_index >= SEND_BUFFER_SIZE) {
+        send_buffer(board);
     }
 }
 
@@ -211,9 +223,9 @@ void set_panel_nums(board_t* board)
     printf("Board %s panels: [", board->serial_num);
     for (i=0; i<NUM_PANELS_PER_BOARD; ++i) {
         while (1) {
-            ret = ftdi_read_data(&(board->handle), read_buf, READ_BUFFER_SIZE);
+            ret = ftdi_read_data(board->handle, read_buf, READ_BUFFER_SIZE);
             if (ret < 0) 
-                exit_with_error(&(board->handle), "ftdi_read_data", ret);
+                exit_with_error(board->handle, "ftdi_read_data", ret);
             if (ret == 1)
                 break;
         }
@@ -234,27 +246,28 @@ void set_panel_nums(board_t* board)
 }
 
 
-void open_board(board_t* board, char* serial_num)
+void init_board(board_t* board, char* serial_num)
 {
-    struct ftdi_context handle;
     int ret;
     
-    init_handle(&handle);
-    ret = ftdi_usb_open_desc(&handle, VENDOR_ID, PRODUCT_ID, DESCRIPTION_STRING,
-                             serial_num);
+    board->handle = &(board->device_context);
+    init_handle(board->handle);
+    ret = ftdi_usb_open_desc(board->handle, VENDOR_ID, PRODUCT_ID,
+                             DESCRIPTION_STRING, serial_num);
     if (ret != 0) 
-        exit_with_error(&handle, "ftdi_usb_open_desc", ret);
-    board->handle = handle;
+        exit_with_error(board->handle, "ftdi_usb_open_desc", ret);
     strncpy(board->serial_num, serial_num, SERIAL_NUM_SIZE);
-    ret = ftdi_usb_purge_buffers(&(board->handle));
+    ret = ftdi_usb_purge_buffers(board->handle);
     if (ret != 0) 
-        exit_with_error(&(board->handle), "ftdi_usb_purge_buffers", ret);
+        exit_with_error(board->handle, "ftdi_usb_purge_buffers", ret);
     set_fpga_mode(board, FPGA_RESET);
     set_fpga_mode(board, FPGA_RUN);
-    ret = ftdi_set_latency_timer(&(board->handle), 1);
+    ret = ftdi_set_latency_timer(board->handle, 1);
     if (ret != 0)
-        exit_with_error(&(board->handle), "ftdi_set_latency_timer", ret);
+        exit_with_error(board->handle, "ftdi_set_latency_timer", ret);
     set_panel_nums(board);
+    board->send_buffer_index = 0;
+    board->shmem = create_shared_mem();
 }
 
 
@@ -271,12 +284,17 @@ void send_chunk_data(board_t* board, BYTE port_num, BYTE row_num,
     send_command(board, 2, port_num); 
     send_command(board, 3, row_num); 
     send_command(board, 4, chunk_num);
+    
     for (i=0; i<NUM_NIBBLES_PER_CHUNK; ++i) {
         command = *(data+(i/2));
-        if (i % 2) command = (command & 0xf0) >> 4;
-        else command = command & 0x0f;
+        if (i % 2) {
+            command = (command & 0xf0) >> 4;
+        } else {
+            command = command & 0x0f;
+        }
         send_command(board, i+5, command); // Send nibbles
     }
+    
     send_command(board, 13, 0);  // Write chunk    
 }
 
@@ -301,14 +319,14 @@ void send_panel_data(board_t* board, BYTE port_num, BYTE* data)
 }
 
 
-void send_board_data(board_t* board, BYTE* shmem)
+void send_board_data(board_t* board)
 {
     int port_num, panel_num;
     
     for (port_num=0; port_num<NUM_PANELS_PER_BOARD; ++port_num) {
         panel_num = board->panel_nums[port_num];
         send_panel_data(board, port_num, 
-                        shmem+(panel_num*NUM_BYTES_PER_PANEL));
+                        board->shmem+(panel_num*NUM_BYTES_PER_PANEL));
     }
 }
 
@@ -324,23 +342,22 @@ long timevaldiff(struct timeval *starttime, struct timeval *finishtime)
 
 void* manage_board(void* serial_num)
 {
-    int reps = 30;
+    int reps = 10000;
     int i, ret;
     struct timeval start, end;
     float duration;
     board_t board;
     BYTE* shmem=NULL;
-
-    shmem = create_shared_mem();
-    open_board(&board, serial_num);
+    
+    init_board(&board, (char*) serial_num);
     while (1) {
         ret = gettimeofday(&start, NULL);
         for (i=0; i<reps; ++i) {
-            send_board_data(&board, shmem);
+            send_board_data(&board);
         }
         ret = gettimeofday(&end, NULL);
         duration = timevaldiff(&start, &end) / 1000.0f;
-        printf("Board# %s: %d frames in %f secs. %.2f fps.\n", 
+        printf("Board# %s: %d frames in %.2f secs. %.2f fps.\n", 
                (char*) serial_num, reps, duration, reps / duration);
     }
     return NULL;
@@ -350,27 +367,29 @@ void* manage_board(void* serial_num)
 int detect_boards(char serial_nums[][SERIAL_NUM_SIZE]) 
 {
     int i, board_num, ret;
-    handle_t handle;
+    context device_context;
+    context* handle;
     struct ftdi_device_list *devlist, *curdev;
     char description[DESCRIPTION_SIZE];
     char manufacturer[MANUFACTURER_SIZE];
     char serial_num[SERIAL_NUM_SIZE];
 
-    init_handle(&handle);
+    handle = &device_context;
+    init_handle(handle);
     
-    ret = ftdi_usb_find_all(&handle, &devlist, VENDOR_ID, PRODUCT_ID);
+    ret = ftdi_usb_find_all(handle, &devlist, VENDOR_ID, PRODUCT_ID);
     if (ret < 0)
-        exit_with_error(&handle, "ftdi_usb_find_all", ret);
+        exit_with_error(handle, "ftdi_usb_find_all", ret);
         
     i = 0;
     board_num = 0;
     for (curdev = devlist; curdev != NULL; i++)
     {
         ret = ftdi_usb_get_strings(
-            &handle, curdev->dev, manufacturer, MANUFACTURER_SIZE, 
+            handle, curdev->dev, manufacturer, MANUFACTURER_SIZE, 
             description, DESCRIPTION_SIZE, serial_num, SERIAL_NUM_SIZE);
         if (ret < 0)
-            exit_with_error(&handle, "ftdi_usb_get_strings", ret);
+            exit_with_error(handle, "ftdi_usb_get_strings", ret);
         if (strncmp(description, DESCRIPTION_STRING, DESCRIPTION_SIZE) == 0) {
             strncpy(serial_nums[board_num++], serial_num, SERIAL_NUM_SIZE);
         }
@@ -378,7 +397,7 @@ int detect_boards(char serial_nums[][SERIAL_NUM_SIZE])
     }
  
     ftdi_list_free(&devlist);
-    ftdi_deinit(&handle);
+    ftdi_deinit(handle);
 
     if (board_num > MAX_BOARDS) {
         fprintf(stderr, 
