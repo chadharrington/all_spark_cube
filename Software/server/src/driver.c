@@ -322,9 +322,8 @@ float timeval_to_float(struct timeval* t)
 void* manage_board(void* serial_num)
 {
     int reps = 30;
-    int i;
+    int i, ret;
     struct timeval start, end;
-    struct timezone tzp;
     float duration;
     board_t board;
     BYTE* shmem=NULL;
@@ -332,11 +331,19 @@ void* manage_board(void* serial_num)
     shmem = create_shared_mem();
     open_board(&board, serial_num);
     while (1) {
-        gettimeofday(&start, &tzp);
+        ret = gettimeofday(&start, NULL);
+        if (ret != 0) {
+            fprintf(stderr, "gettimeofday failed. Errno: %d", errno);
+            exit(-1);
+        }        
         for (i=0; i<reps; ++i) {
             send_board_data(&board, shmem);
         }
-        gettimeofday(&end, &tzp);
+        ret = gettimeofday(&end, NULL);
+        if (ret != 0) {
+            fprintf(stderr, "gettimeofday failed. Errno: %d", errno);
+            exit(-1);
+        }
         duration = timeval_to_float(&end) - timeval_to_float(&start);
         printf("Board# %s: %d frames in %f secs. %.2f fps.\n", 
                (char*) serial_num, reps, duration, reps / duration);
