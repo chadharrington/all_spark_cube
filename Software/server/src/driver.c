@@ -315,6 +315,7 @@ void send_board_data(board_t* board, BYTE* shmem)
 
 float timeval_to_float(struct timeval* t) 
 {
+    printf("tv_sec: %d, tv_usec: %d\n", t->tv_sec, t->tv_usec);
     return t->tv_sec + t->tv_usec / 1E6f;
 }
 
