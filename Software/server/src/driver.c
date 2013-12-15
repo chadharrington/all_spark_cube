@@ -288,7 +288,7 @@ void send_row_data(board_t* board, BYTE port_num, BYTE row_num, BYTE* data)
     for (chunk_num=0; chunk_num<NUM_CHUNKS_PER_ROW; ++chunk_num) 
         send_chunk_data(board, port_num, row_num, chunk_num,
                         data+(chunk_num*NUM_BYTES_PER_CHUNK));
-    }
+}
 
 
 void send_panel_data(board_t* board, BYTE port_num, BYTE* data) 
@@ -313,10 +313,12 @@ void send_board_data(board_t* board, BYTE* shmem)
 }
 
 
-float timeval_to_float(struct timeval* t) 
+long timevaldiff(struct timeval *starttime, struct timeval *finishtime)
 {
-    printf("tv_sec: %d, tv_usec: %d\n", t->tv_sec, t->tv_usec);
-    return t->tv_sec + t->tv_usec / 1E6f;
+    long msec;
+    msec=(finishtime->tv_sec-starttime->tv_sec)*1000;
+    msec+=(finishtime->tv_usec-starttime->tv_usec)/1000;
+    return msec;
 }
 
 
@@ -333,19 +335,11 @@ void* manage_board(void* serial_num)
     open_board(&board, serial_num);
     while (1) {
         ret = gettimeofday(&start, NULL);
-        if (ret != 0) {
-            fprintf(stderr, "gettimeofday failed. Errno: %d", errno);
-            exit(-1);
-        }        
         for (i=0; i<reps; ++i) {
             send_board_data(&board, shmem);
         }
         ret = gettimeofday(&end, NULL);
-        if (ret != 0) {
-            fprintf(stderr, "gettimeofday failed. Errno: %d", errno);
-            exit(-1);
-        }
-        duration = timeval_to_float(&end) - timeval_to_float(&start);
+        duration = timevaldiff(&start, &end) / 1000.0f;
         printf("Board# %s: %d frames in %f secs. %.2f fps.\n", 
                (char*) serial_num, reps, duration, reps / duration);
     }
