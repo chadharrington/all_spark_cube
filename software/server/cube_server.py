@@ -69,6 +69,7 @@ class CubeHandler(CubeInterface.Iface):
         if self.num_frames >= self.max_frames:
             end_time = time.time()
             duration = end_time - self.start_time
+            self.start_time = time.time()
             self.num_frames = 0
             print '%d frames in %.2f seconds. %.2f fps' % (
                 self.max_frames, duration, self.max_frames / duration)
