@@ -411,9 +411,14 @@ void run_driver_threads(char serial_nums[][SERIAL_NUM_SIZE], int num_boards)
 {
     int i;
     pthread_t threads[MAX_BOARDS];
+    struct timespec t;
+    
+    t.tv_sec = 0;
+    t.tv_nsec = 50e6;
     
     for (i=0; i<num_boards; ++i) {
         pthread_create(&threads[i], NULL, &manage_board, &serial_nums[i]);
+        nanosleep(&t, NULL);
     }
     for (i=0; i<num_boards; ++i) {
         pthread_join(threads[i], NULL);
