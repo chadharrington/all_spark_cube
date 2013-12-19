@@ -5,10 +5,14 @@ clients: $(CLIENTS)
 $(CLIENTS):
 	@$(MAKE) -C $@
 
-clean:
-	@-for p in $(CLIENTS); do ($(MAKE) -C $$p clean ); done
-
 install:
 	@-for p in $(CLIENTS); do ($(MAKE) -C $$p install ); done
 
-.PHONY: clients $(CLIENTS) install clean 
+uninstall:
+	@-for p in $(CLIENTS); do ($(MAKE) -C $$p uninstall ); done
+
+clean:
+	@-for p in $(CLIENTS); do ($(MAKE) -C $$p clean ); done
+
+
+.PHONY: clients $(CLIENTS) install uninstall clean 

@@ -13,6 +13,12 @@ client: clean
 	@cp -R $(SRC_DIR)/ $(TAR_DIR)
 	@tar -czf  $(DIST_DIR)/$(PKG_NAME) -C $(BUILD_DIR) .
 
+install:
+	@echo "TBD.."
+
+uninstall:
+	@echo "TBD.."
+
 
 clean:
 	@-rm -rf $(DIST_DIR) $(BUILD_DIR)
@@ -20,5 +26,5 @@ clean:
         # remove .pyc files to prepare clean tarball
 	@find . -name "*.pyc" -print0 | xargs -0 rm -rf
 
-.PHONY: clean client
+.PHONY: clean install uninstall clean
 

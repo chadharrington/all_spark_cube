@@ -35,9 +35,15 @@ install: driver
 	@cp $(SUPERVISORD_CONF) $(SUPERVISORD_CONF_DEST)
 	@chmod 644 $(SUPERVISORD_CONF_DEST)
 
+uninstall: clean
+	@rm -rf $(INSTALL_DIR)
+	@rm $(RULES_DEST)
+	@rm $(SUPERVISORD_INIT_DEST)
+	@rm $(SUPERVISORD_CONF_DEST)
+
 clean:
 	@find . -name "*.pyc" -print0 | xargs -0 rm -rf
 	@-rm -rf $(BUILD_DIR)
 
 
-.PHONY: driver install clean
+.PHONY: driver install uninstall clean

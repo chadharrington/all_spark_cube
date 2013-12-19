@@ -13,9 +13,15 @@ client: $(SRCS) clean
 	@mkdir -p $(DIST_DIR)
 	@tar -czf $(DIST_DIR)/$(PKG_NAME) $(SRC_DIR)
 
+install:
+	@echo "TBD.."
+
+uninstall:
+	@echo "TBD.."
+
 clean:
 	@-rm -f $(ARTIFACT)
 	@-rm -rf $(SRC_DIR)/$(THRIFT_DIRNAME)
 
 
-.PHONY: clean client
+.PHONY: client install uninstall clean
