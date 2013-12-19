@@ -6,26 +6,38 @@ PYTHON_THRIFT_DIR = gen-py
 DRIVER_NAME = driver
 SERVER_FILE = cube_server.py
 RULES_FILE = 99-libftdi.rules
-INIT_FILE = initialization.bin
+RULES_DEST =  /etc/udev/rules.d/$(RULES_FILE)
+CUBE_INIT_FILE = initialization.bin
+SUPERVISORD_INIT = supervisord_init_script
+SUPERVISORD_INIT_DEST = /etc/rc.d/init.d/supervisord
+SUPERVISORD_CONF = supervisord.conf
+SUPERVISORD_CONF_DEST = /etc/$(SUPERVISORD_CONF)
 CC = gcc
 CFLAGS = -O3
 
-all: clean server $(DRIVER) 
 
-server: 
+driver:
+	@mkdir -p $(BUILD_DIR)
 	@$(CC) $(CFLAGS) $(DRIVER_NAME).c -o $(BUILD_DIR)/$(DRIVER_NAME) \
 	    $(shell pkg-config --cflags --libs libftdi1)
-	@cp $(SERVER_FILE) $(BUILD_DIR)
-	@cp -R $(THRIFT_DIRNAME)/$(PYTHON_THRIFT_DIR) $(BUILD_DIR)	
-	@cp $(RULES_FILE) $(BUILD_DIR)
-	@cp $(INIT_FILE) $(BUILD_DIR)
+
+install: driver
+	@mkdir -p $(INSTALL_DIR)
+	@cp $(BUILD_DIR)/$(DRIVER_NAME) $(INSTALL_DIR)
+	@chmod ugo+x $(INSTALL_DIR)/$(DRIVER_NAME)
+	@cp $(SERVER_FILE) $(INSTALL_DIR)
+	@-cp -R $(THRIFT_DIR)/$(PYTHON_THRIFT_DIR) $(INSTALL_DIR)
+	@cp $(RULES_FILE) $(RULES_DEST)
+	@chmod 644 $(RULES_DEST)
+	@cp $(CUBE_INIT_FILE) $(INSTALL_DIR)
+	@cp $(SUPERVISORD_INIT) $(SUPERVISORD_INIT_DEST)
+	@chmod 755 $(SUPERVISORD_INIT_DEST)
+	@cp $(SUPERVISORD_CONF) $(SUPERVISORD_CONF_DEST)
+	@chmod 644 $(SUPERVISORD_CONF_DEST)
 
 clean:
 	@find . -name "*.pyc" -print0 | xargs -0 rm -rf
 	@-rm -rf $(BUILD_DIR)
-	@mkdir -p $(BUILD_DIR)
-
-install: all
 
 
-.PHONY: all server clean  install
+.PHONY: driver install clean
