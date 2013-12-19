@@ -8,4 +8,7 @@ $(CLIENTS):
 clean:
 	@-for p in $(CLIENTS); do ($(MAKE) -C $$p clean ); done
 
-.PHONY: clients $(CLIENTS) clean
+install:
+	@-for p in $(CLIENTS); do ($(MAKE) -C $$p install ); done
+
+.PHONY: clients $(CLIENTS) install clean 

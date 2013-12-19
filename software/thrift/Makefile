@@ -11,7 +11,11 @@ gen-py: clean $(THRIFT_SRC)
 gen-perl: clean $(THRIFT_SRC)
 	@$(THRIFT_COMPILER) -gen perl $(THRIFT_SRC)
 
+install:
+	@echo "Nothing to install..."
+
 clean:
 	@-rm -rf $(THRIFT_ARTIFACTS)
 
-.PHONY: clean artifacts
+
+.PHONY: artifacts $(THRIFT_ARTIFACTS) install clean
