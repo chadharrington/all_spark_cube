@@ -14,8 +14,11 @@ gen-perl: clean $(THRIFT_SRC)
 install:
 	@echo "Nothing to install..."
 
+uninstall:
+	@echo "Nothing to uninstall..."
+
 clean:
 	@-rm -rf $(THRIFT_ARTIFACTS)
 
 
-.PHONY: artifacts $(THRIFT_ARTIFACTS) install clean
+.PHONY: artifacts $(THRIFT_ARTIFACTS) install uninstall clean
