@@ -13,7 +13,7 @@ SUPERVISORD_CONF = supervisord.conf
 SUPERVISORD_CONF_DEST = /etc/$(SUPERVISORD_CONF)
 CC = gcc
 CPP = g++
-CFLAGS = -O3
+CFLAGS = -O3 -Wall
 
 all: driver server
 
@@ -24,7 +24,7 @@ driver: $(DRIVER_NAME).c
 
 server: $(SERVER_NAME).cpp
 	@mkdir -p $(BUILD_DIR)
-	$(CPP) $(CFLAGS) --std=c++11 $< \
+	@$(CPP) $(CFLAGS) --std=c++11 $< \
 	    $(THRIFT_DIR)/CubeInterface.cpp \
 	    -o $(BUILD_DIR)/$(SERVER_NAME) \
 	    -I $(THRIFT_DIR) -I /usr/local/include \

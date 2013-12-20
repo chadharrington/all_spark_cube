@@ -347,7 +347,6 @@ void* manage_board(void* serial_num)
     struct timeval start, end;
     float duration;
     board_t board;
-    BYTE* shmem=NULL;
     
     init_board(&board, (char*) serial_num);
     while (1) {
