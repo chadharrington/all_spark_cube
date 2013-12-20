@@ -24,7 +24,7 @@ driver: $(DRIVER_NAME).c
 
 server: $(SERVER_NAME).cpp
 	@mkdir -p $(BUILD_DIR)
-	@$(CPP) $(CFLAGS) --std=c++11 $< \
+	@$(CPP) $(CFLAGS) -std=c++0x $< \
 	    $(THRIFT_DIR)/CubeInterface.cpp \
 	    -o $(BUILD_DIR)/$(SERVER_NAME) \
 	    -I $(THRIFT_DIR) -I /usr/local/include \
