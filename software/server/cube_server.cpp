@@ -26,7 +26,7 @@ public:
     }
 
     void set_data(const int16_t index, const std::vector<int16_t> & data) {
-        if (data.size <= SHM_SIZE) {
+        if (data.size() <= SHM_SIZE) {
             memmove(shmem + index, data.data(), data.size());
         }
     }
