@@ -1,10 +1,9 @@
 NAME = cube_server
 BUILD_DIR = build
 INSTALL_DIR = /opt/adaptive/cube
-THRIFT_DIR = ../thrift
-PYTHON_THRIFT_DIR = gen-py
+THRIFT_DIR = ../thrift/gen-cpp
 DRIVER_NAME = cube_driver
-SERVER_FILE = cube_server.py
+SERVER_NAME = cube_server
 RULES_FILE = 99-libftdi.rules
 RULES_DEST =  /etc/udev/rules.d/$(RULES_FILE)
 CUBE_INIT_FILE = initialization.bin
@@ -13,20 +12,32 @@ SUPERVISORD_INIT_DEST = /etc/rc.d/init.d/supervisord
 SUPERVISORD_CONF = supervisord.conf
 SUPERVISORD_CONF_DEST = /etc/$(SUPERVISORD_CONF)
 CC = gcc
+CPP = g++
 CFLAGS = -O3
 
+all: driver server
 
-driver:
+driver: $(DRIVER_NAME).c
 	@mkdir -p $(BUILD_DIR)
-	@$(CC) $(CFLAGS) $(DRIVER_NAME).c -o $(BUILD_DIR)/$(DRIVER_NAME) \
+	@$(CC) $(CFLAGS) $<  -o $(BUILD_DIR)/$(DRIVER_NAME) \
 	    $(shell pkg-config --cflags --libs libftdi1)
+
+server: $(SERVER_NAME).cpp
+	@mkdir -p $(BUILD_DIR)
+	$(CPP) $(CFLAGS) --std=c++11 $< \
+	    $(THRIFT_DIR)/CubeInterface.cpp \
+	    -o $(BUILD_DIR)/$(SERVER_NAME) \
+	    -I $(THRIFT_DIR) -I /usr/local/include \
+	    -I /usr/include -L/usr/local/lib -lthrift
+
+
 
 install: driver
 	@mkdir -p $(INSTALL_DIR)
 	@cp $(BUILD_DIR)/$(DRIVER_NAME) $(INSTALL_DIR)
 	@chmod ugo+x $(INSTALL_DIR)/$(DRIVER_NAME)
-	@cp $(SERVER_FILE) $(INSTALL_DIR)
-	@-cp -R $(THRIFT_DIR)/$(PYTHON_THRIFT_DIR) $(INSTALL_DIR)
+	@cp $(BUILD_DIR)/$(SERVER_NAME) $(INSTALL_DIR)
+	@chmod ugo+x $(INSTALL_DIR)/$(SERVER_NAME)
 	@cp $(RULES_FILE) $(RULES_DEST)
 	@chmod 644 $(RULES_DEST)
 	@cp $(CUBE_INIT_FILE) $(INSTALL_DIR)
@@ -46,4 +57,4 @@ clean:
 	@-rm -rf $(BUILD_DIR)
 
 
-.PHONY: driver install uninstall clean
+.PHONY: all driver server install uninstall clean
