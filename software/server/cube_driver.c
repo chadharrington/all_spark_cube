@@ -433,5 +433,7 @@ int main()
     num_boards = detect_boards(serial_nums);
     printf("%d boards detected\n", num_boards);
     run_driver_threads(serial_nums, num_boards);
+
+    return 0;
 }
 
