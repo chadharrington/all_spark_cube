@@ -26,7 +26,7 @@ class CubeInterfaceHandler : virtual public CubeInterfaceIf {
 };
 
 int main(int argc, char **argv) {
-  int port = 9090;
+  int port = 12345;
   shared_ptr<CubeInterfaceHandler> handler(new CubeInterfaceHandler());
   shared_ptr<TProcessor> processor(new CubeInterfaceProcessor(handler));
   shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
