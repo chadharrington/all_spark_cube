@@ -53,14 +53,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
-#include <sys/shm.h>
 #include <time.h>
 
 #include <ftdi.h> 
 
-#define SHM_KEY 1278899529
-#define SHM_SIZE 12288
+#include "shmem.h"
+
 #define SHM_PERMS 0444
 #define MAX_BOARDS 10
 #define NUM_BYTES_PER_CHUNK 4
@@ -84,7 +82,6 @@
 #define PRODUCT_ID 0x6014
 
 typedef enum {FPGA_RESET, FPGA_RUN} FPGA_MODE;
-typedef unsigned char BYTE;
 typedef struct ftdi_context context;
 typedef struct 
 {
@@ -98,28 +95,7 @@ typedef struct
 } board_t;
 
 
-BYTE* create_shared_mem() 
-{
-    int shm_id, retval;
-    BYTE* shared_mem;
-        
-    shm_id = shmget(SHM_KEY, SHM_SIZE, SHM_PERMS);
-    if (shm_id == -1) {
-        fprintf(stderr, "shmget failed. Errno %d.\n", errno);
-        exit(-1);
-    }
-    shared_mem = shmat(shm_id, (void*) 0, 0);
-    if (shared_mem == (void*) -1) {
-        fprintf(stderr, "shmat failed. Errno %d.\n", errno);
-        exit(-1);
-    }
-    retval = mlock(shared_mem, SHM_SIZE);
-    if (retval == -1) {
-        fprintf(stderr, "mlock failed. Errno %d.\n", errno);
-        exit(-1);
-    }
-    return shared_mem;
-}
+
 
 
 void exit_with_error(context* handle, char* func_name, int val) 
@@ -267,7 +243,7 @@ void init_board(board_t* board, char* serial_num)
         exit_with_error(board->handle, "ftdi_set_latency_timer", ret);
     set_panel_nums(board);
     board->send_buffer_index = 0;
-    board->shmem = create_shared_mem();
+    board->shmem = get_shared_mem(SHM_PERMS);
 }
 
 
