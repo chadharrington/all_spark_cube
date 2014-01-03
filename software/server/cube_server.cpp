@@ -22,14 +22,11 @@ class CubeInterfaceHandler : virtual public CubeInterfaceIf {
     BYTE* shmem;
 public:
     CubeInterfaceHandler() {
-        char* file_data=nullptr;
-        
         shmem = get_shared_mem(SHM_PERMS);
         std::ifstream initfile("/opt/adaptive/cube/initialization.bin", 
                           std::ios::binary | std::ios::in);
-        initfile.read(file_data, SHM_SIZE);
+        initfile.read((char*)shmem, SHM_SIZE);
         initfile.close();
-        memmove(shmem, (BYTE*) file_data, SHM_SIZE);
     }
 
     void set_data(const int16_t index, const std::vector<int16_t> & data) {
