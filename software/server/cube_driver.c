@@ -323,12 +323,17 @@ void* manage_board(void* serial_num)
     struct timeval start, end;
     float duration;
     board_t board;
+    struct timespec t;
+    
+    t.tv_sec = 0;
+    t.tv_nsec = 8e6; /* 8 ms delay between loops */
     
     init_board(&board, (char*) serial_num);
     while (1) {
         ret = gettimeofday(&start, NULL);
         for (i=0; i<reps; ++i) {
             send_board_data(&board);
+            nanosleep(&t, NULL);
         }
         ret = gettimeofday(&end, NULL);
         duration = timevaldiff(&start, &end) / 1000.0f;
@@ -382,7 +387,7 @@ int detect_boards(char serial_nums[][SERIAL_NUM_SIZE])
     return board_num;
 }
 
-void run_driver_threads(char serial_nums[][SERIAL_NUM_SIZE], int num_boards)
+void create_driver_threads(char serial_nums[][SERIAL_NUM_SIZE], int num_boards)
 {
     int i;
     pthread_t threads[MAX_BOARDS];
@@ -408,7 +413,7 @@ int main()
     printf("Driver starting...\n");
     num_boards = detect_boards(serial_nums);
     printf("%d boards detected\n", num_boards);
-    run_driver_threads(serial_nums, num_boards);
+    create_driver_threads(serial_nums, num_boards);
 
     return 0;
 }
