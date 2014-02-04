@@ -31,7 +31,9 @@ public:
 
     void set_data(const int16_t index, const std::vector<int16_t> & data) {
         if (data.size() <= SHM_SIZE) {
-            memmove(shmem + index, data.data(), data.size());
+            for (unsigned int i=0; i<data.size(); ++i) {
+                *(shmem + index + i) = (unsigned char) data[i];
+            }
         }
     }
 
