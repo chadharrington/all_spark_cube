@@ -32,5 +32,5 @@ or
 
 ## Aditional information
 
-[http://allsparkcube.com/](http://allsparkcube.com/)
-[hack a day](http://hackaday.com/2012/10/21/4096-leds-means-the-biggest-led-cube-ever/)
+[http://allsparkcube.com/](http://allsparkcube.com/)  
+[hack a day](http://hackaday.com/2012/10/21/4096-leds-means-the-biggest-led-cube-ever/)  
