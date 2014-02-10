@@ -2,14 +2,14 @@
 
 from random import randint
 
-from all_spark_cube_client import CubeClient
+from all_spark_cube_client import CubeClient, Color
 
 
-HOST='192.168.0.100'
+HOST='cube.ac'
 PORT=12345
 
-index = 0
-data = [randint(0, 255) for x in range(4096 * 3)]
-
 client = CubeClient(HOST, PORT)
-client.set_data(index, data)
+
+data = [Color(0, 255, 0) for x in range(4096)]
+client.set_data(data)
+

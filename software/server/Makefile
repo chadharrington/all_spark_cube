@@ -26,6 +26,7 @@ server: $(SERVER_NAME).cpp
 	@mkdir -p $(BUILD_DIR)
 	@$(CPP) $(CFLAGS) -std=c++0x $< \
 	    $(THRIFT_DIR)/CubeInterface.cpp \
+	    $(THRIFT_DIR)/cube_interface_types.cpp \
 	    -o $(BUILD_DIR)/$(SERVER_NAME) \
 	    -I $(THRIFT_DIR) -I /usr/local/include \
 	    -I /usr/include -L/usr/local/lib -lthrift

@@ -29,10 +29,12 @@ public:
         initfile.close();
     }
 
-    void set_data(const int16_t index, const std::vector<int16_t> & data) {
-        if (data.size() <= SHM_SIZE) {
-            for (unsigned int i=0; i<data.size(); ++i) {
-                *(shmem + index + i) = (unsigned char) data[i];
+    void set_data(const std::vector<Color> & data) {            
+        if (data.size() == SHM_SIZE) {
+            for (unsigned int i=0; i<SHM_SIZE; ++i) {
+                *(shmem + i) = (unsigned char) data[i].red;
+                *(shmem + i + 1) = (unsigned char) data[i].green;
+                *(shmem + i + 2) = (unsigned char) data[i].blue;
             }
         }
     }

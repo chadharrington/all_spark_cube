@@ -5,7 +5,7 @@ import time
 from all_spark_cube_client import CubeClient
 from colors import *
 
-HOST='10.0.1.100'
+HOST='cube.ac'
 PORT=12345
 
 X_SIZE = 16
@@ -25,9 +25,6 @@ BLOCK_SHAPES = {
          [(x, y) for x in range(2, 5) for y in range(2, 5)]),
     'Z': (red, [(x, y) for x in range(5) for y in range(3)] + \
          [(x, y) for x in range(-2, 3) for y in range(2, 5)])}
-
-def flatten(l):
-    return list(chain.from_iterable(l))
 
 
 class XYPoint(object):
@@ -127,7 +124,7 @@ class Frame(object):
             self.render(shape)
         if self.frame_count == 0:
             self.start_time = time.time()
-        self.client.set_data(0, flatten(self.buffer))
+        self.client.set_data(self.buffer)
         self.frame_count += 1
         if self.frame_count == self.reps:
             duration = time.time() - self.start_time
