@@ -22,8 +22,8 @@ class CubeClient(object):
 
     def set_data(self, data):
         """Write frame data to the cube"""
-        if len(data) != 12288:
-            raise ValueError('Length of data parameter must be 12288')
+        if len(data) != 4096:
+            raise ValueError('Length of data parameter must be 4096')
         self.client.set_data(data)
         
 Color = ThriftColor

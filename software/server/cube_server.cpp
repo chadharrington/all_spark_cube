@@ -16,7 +16,7 @@ using namespace ::apache::thrift::server;
 using boost::shared_ptr;
 
 #define SHM_PERMS 0666 | IPC_CREAT
-
+#define FRAME_SIZE 4096
 
 class CubeInterfaceHandler : virtual public CubeInterfaceIf {
     BYTE* shmem;
@@ -30,11 +30,12 @@ public:
     }
 
     void set_data(const std::vector<Color> & data) {            
-        if (data.size() == SHM_SIZE) {
-            for (unsigned int i=0; i<SHM_SIZE; ++i) {
-                *(shmem + i) = (unsigned char) data[i].red;
-                *(shmem + i + 1) = (unsigned char) data[i].green;
-                *(shmem + i + 2) = (unsigned char) data[i].blue;
+        // Ignore anything that is not a full frame
+        if (data.size() == FRAME_SIZE) {
+            for (unsigned int i=0; i<FRAME_SIZE; ++i) {
+                *(shmem + 3*i) = (unsigned char) data[i].red;
+                *(shmem + 3*i + 1) = (unsigned char) data[i].green;
+                *(shmem + 3*i + 2) = (unsigned char) data[i].blue;
             }
         }
     }
