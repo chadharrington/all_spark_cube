@@ -6,7 +6,6 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 
 from cube_interface import CubeInterface
-from cube_interface.ttypes import Color as ThriftColor
 
 
 class CubeClient(object):
@@ -20,10 +19,7 @@ class CubeClient(object):
     def __del__(self):
         self.transport.close()
 
-    def set_data(self, data):
-        """Write frame data to the cube"""
-        if len(data) != 12288:
-            raise ValueError('Length of data parameter must be 12288')
-        self.client.set_data(data)
+    def set_data(self, index, data):
+        """Write color data to the cube, starting at index"""
+        self.client.set_data(index, data)
         
-Color = ThriftColor

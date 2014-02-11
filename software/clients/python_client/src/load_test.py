@@ -3,12 +3,12 @@ import time
 from all_spark_cube_client import CubeClient
 from colors import *
 
-HOST='cube.ac'
+HOST='10.0.1.100'
 PORT=12345
 
 
 def main():
-    buffer = [orange for x in range(4096)]
+    buffer = [255 for x in range(4096*3)]
     client = CubeClient(HOST, PORT)
     reps = 300
     while True:
