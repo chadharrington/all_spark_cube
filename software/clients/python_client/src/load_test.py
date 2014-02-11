@@ -16,7 +16,7 @@ def main():
         for x in range(reps):
             client.set_colors(buffer)
         duration = time.time() - start
-        print '%d frames in %.2f secs. %.2f fps.' % (
+        print '"%d frames in %.2f secs. (%.2f fps)' % (
                 reps, duration, reps / float(duration))
 
 
