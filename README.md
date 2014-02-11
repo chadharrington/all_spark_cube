@@ -12,9 +12,9 @@ To install the server on a RHEL/CentOS machine:
 
 3- $ `cd all_spark_cube/software`
 
-4- $ `make`
+4- $ `cd server`
 
-5- $ `cd server`
+5- $ `make`
 
 6- $ `sudo make install`
 
