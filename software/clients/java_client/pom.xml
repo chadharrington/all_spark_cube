@@ -3,6 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.allsparkcube</groupId>
   <artifactId>cube_client</artifactId>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>cube_client</name>

@@ -26,18 +26,22 @@ public class CubeClient {
         Arrays.fill(buffer, defaultValue);
     }
 
-    public void setColor(int ledNum, Color color) {
+    public void setLed(int ledNum, Color color) {
         buffer[ledNum * 3] = (short) color.getRed();
         buffer[ledNum * 3 + 1] = (short) color.getGreen();
         buffer[ledNum * 3 + 2] = (short) color.getBlue();
     }
 
-    public void setColors(int ledNumStart, List<Color> colors) {
-        for(int i=ledNumStart; i < ledNumStart + colors.size(); i++) {
-            setColor(i, colors.get(i));
+    public void setLedRange(int ledNumStart, int numLeds, Color color) {
+        for(int i=ledNumStart; i < ledNumStart + numLeds; i++) {
+            setLed(i, color);
         }
     }
-    
+
+    public void setAllLeds(Color color) {
+        setLedRange(0, 4096, color);
+    }
+
     public void send() {
         try {
             transport.open();
