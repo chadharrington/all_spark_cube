@@ -12,6 +12,6 @@ clean:
 	@-for p in $(PROJECTS); do ($(MAKE) -C $$p clean ); done
 
 
-.PHONY: projects $(PROJECTS) install uninstall clean
+.PHONY: projects $(PROJECTS) clean
 
 
