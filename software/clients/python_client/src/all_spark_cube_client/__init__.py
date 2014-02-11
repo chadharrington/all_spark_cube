@@ -7,6 +7,14 @@ from thrift.transport import TTransport
 
 from cube_interface import CubeInterface
 
+NUM_VOXELS = 4096
+
+class Color(object):
+    def __init__(self, red, green, blue):
+        self.red = red
+        self.green = green 
+        self.blue = blue
+
 
 class CubeClient(object):
     def __init__(self, host, port):
@@ -19,7 +27,14 @@ class CubeClient(object):
     def __del__(self):
         self.transport.close()
 
-    def set_data(self, index, data):
-        """Write color data to the cube, starting at index"""
-        self.client.set_data(index, data)
+    def set_colors(self, colors):
+        """Write color data to the cube"""
+        if len(colors) != NUM_VOXELS:
+            raise ValueError('The length of the colors array must be 4096')
+        data = []
+        for color in colors:
+            data.append(color.red)
+            data.append(color.green)
+            data.append(color.blue)
+        self.client.set_data(data)
         
