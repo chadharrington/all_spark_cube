@@ -4,7 +4,7 @@
   <groupId>com.allsparkcube</groupId>
   <artifactId>cube_client</artifactId>
   <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
   <name>cube_client</name>
   <url>http://maven.apache.org</url>
   <dependencies>
@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.5</version>
+      <version>1.5.8</version>
     </dependency>
   </dependencies>
   <build>
