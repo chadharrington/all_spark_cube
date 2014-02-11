@@ -19,5 +19,5 @@ clean:
         # remove .pyc files to prepare clean tarball
 	@find . -name "*.pyc" -print0 | xargs -0 rm -rf
 
-.PHONY: clean install uninstall clean
+.PHONY: client install uninstall clean
 
