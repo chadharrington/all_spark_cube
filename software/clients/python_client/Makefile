@@ -13,13 +13,6 @@ client: clean
 	@cp -R $(SRC_DIR)/ $(TAR_DIR)
 	@tar -czf  $(DIST_DIR)/$(PKG_NAME) -C $(BUILD_DIR) .
 
-install:
-	@echo "TBD.."
-
-uninstall:
-	@echo "TBD.."
-
-
 clean:
 	@-rm -rf $(DIST_DIR) $(BUILD_DIR)
 	@-rm -rf $(SRC_DIR)/$(THRIFT_DIRNAME)

@@ -8,12 +8,6 @@ server: thrift
 $(PROJECTS):
 	@$(MAKE) -C $@
 
-install:
-	@-for p in $(PROJECTS); do ($(MAKE) -C $$p install ); done
-
-uninstall:
-	@-for p in $(PROJECTS); do ($(MAKE) -C $$p uninstall ); done
-
 clean:
 	@-for p in $(PROJECTS); do ($(MAKE) -C $$p clean ); done
 
