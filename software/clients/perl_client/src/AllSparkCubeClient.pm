@@ -26,15 +26,15 @@ sub new {
 
 sub DESTROY {
     my $self = shift;
-    
     $self->{transport}->close();
 }
 
-sub set_data {
-    my $self = shift;
-    my ($index, $data) = @_;
- 
-   $self->{client}->set_data($index, $data);
+sub set_colors {
+    my ($self, $data) = @_;
+    if (scalar $data != 4096) {
+        die "Error: Length of data must be 4096. Stopped";
+    }
+    $self->{client}->set_data($data);
 }
 
 1;
