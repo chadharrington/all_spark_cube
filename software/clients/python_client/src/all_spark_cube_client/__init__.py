@@ -9,11 +9,28 @@ from cube_interface import CubeInterface
 
 NUM_VOXELS = 4096
 
+
 class Color(object):
     def __init__(self, red, green, blue):
         self.red = red
         self.green = green 
         self.blue = blue
+
+
+class Colors(object):
+        yellow = Color(255, 255, 0)
+        cyan = Color(0, 255, 255)
+        magenta = Color(255, 0, 255)
+        red = Color(255, 0, 0)
+        green = Color(0, 255, 0)
+        blue = Color(0, 0, 255)
+        white = Color(255, 255, 255)
+        black = Color(0, 0, 0)
+        gray = Color(100, 100, 100)
+        dark_green = Color(36, 84, 48)
+        orange = Color(255, 127, 0)
+        light_yellow = Color(127, 127, 0)
+        pink = Color(255, 192, 203)
 
 
 class CubeClient(object):
@@ -22,19 +39,28 @@ class CubeClient(object):
         self.transport = TTransport.TBufferedTransport(socket)
         self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
         self.client = CubeInterface.Client(self.protocol)
-        self.transport.open()        
+        self.transport.open()
+        self.buffer = [0 for x in range(NUM_VOXELS *3)]
 
     def __del__(self):
         self.transport.close()
 
-    def set_colors(self, colors):
-        """Write color data to the cube"""
-        if len(colors) != NUM_VOXELS:
-            raise ValueError('The length of the colors array must be 4096')
-        data = []
-        for color in colors:
-            data.append(color.red)
-            data.append(color.green)
-            data.append(color.blue)
-        self.client.set_data(data)
+    def set_led(self, led_num, color):
+        """Set a single LED to the specified color."""
+        self.buffer[led_num * 3] = color.red
+        self.buffer[led_num * 3 + 1] = color.green
+        self.buffer[led_num * 3 + 2] = color.blue
+
+    def set_led_range(self, led_num_start, num_leds, color):
+        """Set a range of LEDs to the specified color."""
+        for i in range(led_num_start, led_num_start + num_leds):
+            self.set_led(i, color)
+
+    def set_all_leds(self, color):
+        """Set all LEDs to the specified color."""
+        self.set_led_range(0, 4096, color)
+
+    def send(self):
+        """Actually send the data to the cube."""
+        self.client.set_data(self.buffer)
         
