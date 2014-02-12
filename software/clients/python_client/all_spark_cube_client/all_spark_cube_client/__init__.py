@@ -1,5 +1,4 @@
 import sys
-sys.path.append('./gen-py')
 
 from thrift.protocol import TBinaryProtocol
 from thrift.transport import TSocket
