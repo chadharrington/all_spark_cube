@@ -9,12 +9,12 @@ info is available here:
 
 To interact with the All Spark Cube, you'll need a client library for your 
 preferred programming language. There are currently cube clients available for 
-<a href="#python_client">Python</a> and <a href="#java_client">Java</a>. Skip 
-to the relevant section for your language.
+Python and Java. Skip to the relevant section for your language.
 
-#### <a id="python_client">Python Client Install</a>
+#### Python Client Install
 
-1. Install the [python client library](https://pypi.python.org/pypi/all_spark_cube_client/) using pip. If you don't have pip installed, get it 
+1. Install the [python client library](https://pypi.python.org/pypi/all_spark_cube_client/)
+using pip. If you don't have pip installed, get it 
 [here.](http://www.pip-installer.org/en/latest/installing.html)
 
     $ pip install all_spark_cube_client
@@ -34,7 +34,7 @@ you get errors instead, open the helloworld.py file and make sure the HOST
 parameter is set to the correct network address for the cube. You should also 
 make sure the cube is turned on and reachable over the network.
 
-#### <a id="java_client">Java Client Install</a>
+#### Java Client Install
 
 TBD
 
