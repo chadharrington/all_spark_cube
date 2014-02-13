@@ -8,9 +8,35 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>cube_client</name>
-  <url>http://maven.apache.org</url>
+  <version>0.5</version>
+  <name>Java Client for the All Spark Cube</name>
+  <description>Java Client for the All Spark Cube</description>
+  <url>https://github.com/chadharrington/all_spark_cube</url>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <issueManagement>
+    <url>https://github.com/chadharrington/all_spark_cube/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+  <scm>
+    <url>https://github.com/chadharrington/all_spark_cube</url>
+    <connection>
+      scm:git:https://github.com/chadharrington/all_spark_cube.git
+    </connection>
+  </scm>
+  <developers>
+    <developer>
+      <email>chad.harrington@gmail.com</email>
+      <name>Chad Harrington</name>
+      <url>https://github.com/chadharrington</url>
+      <id>chadharrington</id>
+    </developer>
+  </developers>
   <dependencies>
     <dependency>
       <groupId>org.apache.thrift</groupId>
@@ -37,6 +63,37 @@
             <phase>package</phase> 
             <goals>
               <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <configuration>
+              <sourceFileIncludes>
+                <include>CubeClient.java</include>
+              </sourceFileIncludes>
+              <sourcepath>${basedir}/src/main/java/com/allsparkcube</sourcepath>
+            </configuration>
+            <goals>
+              <goal>jar</goal>
             </goals>
           </execution>
         </executions>

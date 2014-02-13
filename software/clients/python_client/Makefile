@@ -7,7 +7,7 @@ BUILD_DIR = `find . -name "*.egg-info"`
 
 client: clean
 	@cp -R $(THRIFT_DIR)/$(THRIFT_INTERFACE_DIRNAME) $(SRC_DIR)
-	@cd $(SRC_DIR); python setup.py sdist
+	@cd $(SRC_DIR); python setup.py sdist -q
 
 
 clean:

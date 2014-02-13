@@ -3,7 +3,7 @@ import java.awt.Color;
 import com.allsparkcube.CubeClient;
 
 
-public class CubeDemo {
+public class HelloWorld {
     public static void main(String[] args) {
 
         // final String HOST = "localhost";
