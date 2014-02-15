@@ -8,7 +8,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <packaging>jar</packaging>
-  <version>0.5</version>
+  <version>0.5-SNAPSHOT</version>
   <name>Java Client for the All Spark Cube</name>
   <description>Java Client for the All Spark Cube</description>
   <url>https://github.com/chadharrington/all_spark_cube</url>
@@ -49,6 +49,11 @@
       <version>1.5.8</version>
     </dependency>
   </dependencies>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
   <build>
     <plugins>
       <plugin>
@@ -70,6 +75,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
+        <version>2.2.1</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -101,6 +107,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.4</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>

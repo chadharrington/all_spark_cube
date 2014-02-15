@@ -1,2 +1,4 @@
 target
 *.class
+*.releaseBackup
+release.properties
