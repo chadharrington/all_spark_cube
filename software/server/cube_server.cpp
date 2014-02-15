@@ -16,7 +16,7 @@ using namespace ::apache::thrift::server;
 using boost::shared_ptr;
 
 #define SHM_PERMS 0666 | IPC_CREAT
-#define NUM_VOXELS 4096
+
 
 class CubeInterfaceHandler : virtual public CubeInterfaceIf {
     BYTE* shmem;
@@ -30,8 +30,8 @@ public:
     }
 
     void set_data(const std::vector<int16_t> & data) {
-        if (data.size() == NUM_VOXELS) {
-            for (unsigned int i=0; i<NUM_VOXELS; ++i) {
+        if (data.size() == SHM_SIZE) {
+            for (unsigned int i=0; i<SHM_SIZE; ++i) {
                 *(shmem + i) = (unsigned char) data[i];
             }
         }
