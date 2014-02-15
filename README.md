@@ -62,12 +62,15 @@ the server code.
 
 The server code and these instructions assume a CentOS / RHEL server.
 
+1 - Install supervisor from http://supervisord.org/
+2 - Run these commands:
+
 ```    
-$ sudo yum install thrift boost supervisor
+$ sudo yum install thrift boost
 $ git clone https://github.com/chadharrington/all_spark_cube.git
-$ cd all_spark_cube/software
+$ cd all_spark_cube/software/thrift
 $ make
-$ cd server
+$ cd ../server
 $ sudo make install
 $ sudo reboot now
 ```

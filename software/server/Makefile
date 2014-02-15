@@ -32,7 +32,7 @@ server: $(SERVER_NAME).cpp
 
 
 
-install: driver
+install: driver server
 	@mkdir -p $(INSTALL_DIR)
 	@cp $(BUILD_DIR)/$(DRIVER_NAME) $(INSTALL_DIR)
 	@chmod ugo+x $(INSTALL_DIR)/$(DRIVER_NAME)
