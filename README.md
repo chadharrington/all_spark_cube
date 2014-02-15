@@ -46,8 +46,8 @@ After you have the jar, you should download and run the [Hello World](https://gi
 
 ```
 $ wget -O HelloWorld.java http://git.io/hellojavacube
-$ javac -cp xxx HelloWorld.java
-$ java -cp xxx HelloWorld
+$ javac -cp .:xxx HelloWorld.java
+$ java -cp .:xxx HelloWorld
 ```
 The cube should update and you should see "Success..." on your command line. If 
 you get errors instead, open the HelloWorld.java file and make sure the HOST 

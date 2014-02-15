@@ -6,9 +6,10 @@ import com.allsparkcube.CubeClient;
 public class LoadTest {
     public static void main(String[] args) {
 
-        final String HOST = "localhost";
+        // final String HOST = "localhost";
+        final String HOST = "cube.ac";
         final int PORT = 12345;
-        final int reps = 1500;
+        final int reps = 500;
         
         CubeClient client = new CubeClient(HOST, PORT);
         

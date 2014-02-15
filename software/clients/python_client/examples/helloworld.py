@@ -19,11 +19,11 @@ client.set_led(0, Colors.red)
 # Set the second LED (#1) to a custom color (teal-ish)
 client.set_led(1, Color(100, 255, 95))
 
-# Set the last LED (#4095) to green
-client.set_led(4095, Colors.green)
-
 # Starting at LED #48, set 16 LEDs to yellow
 client.set_led_range(48, 16, Colors.yellow)
+
+# Set the last LED (#4095) to green
+client.set_led(4095, Colors.green)
 
 # Actually send the data to the cube
 client.send();  
