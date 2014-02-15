@@ -4,8 +4,8 @@ import time
 
 from all_spark_cube_client import CubeClient, Colors
 
-HOST = 'localhost'
-#HOST='cube.ac'
+#HOST = 'localhost'
+HOST='cube.ac'
 PORT=12345
 
 
