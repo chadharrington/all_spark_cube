@@ -8,7 +8,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <packaging>jar</packaging>
-  <version>0.5-SNAPSHOT</version>
+  <version>0.6-SNAPSHOT</version>
   <name>Java Client for the All Spark Cube</name>
   <description>Java Client for the All Spark Cube</description>
   <url>https://github.com/chadharrington/all_spark_cube</url>

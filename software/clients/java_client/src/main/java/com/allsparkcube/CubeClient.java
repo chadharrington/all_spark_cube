@@ -80,16 +80,14 @@ public class CubeClient {
  * the cube will be updated to match the colors stored in the
  * internal buffer.
 */
-    public void send() {
+    public void send() throws TException {
         try {
             transport.open();
             protocol = new TBinaryProtocol(transport);
             client = new CubeInterface.Client(protocol);
             client.set_data(Arrays.asList(buffer));
-        } catch (TTransportException e) {
-            e.printStackTrace();
-        } catch (TException x) {
-            x.printStackTrace();
+        } catch (TException e) {
+            throw e;
         } finally {
             transport.close();
         }
