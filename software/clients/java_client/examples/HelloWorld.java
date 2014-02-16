@@ -1,6 +1,7 @@
 import java.awt.Color;
 
 import com.allsparkcube.CubeClient;
+import org.apache.thrift.TException;
 
 
 public class HelloWorld {
