@@ -148,13 +148,10 @@ parameter is set to the correct network address for the cube. You should also
 make sure the cube is turned on and reachable over the network.
 
 #### Direct Download 
-If you don't use Maven, you can download and use the client jar directly from GitHub:
-
-`$ wget https://github.com/chadharrington/all_spark_cube/releases/download/0.6-release/cube_client-0.6-standalone.jar`
-
-Then download the code and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) example:
+If you don't use Maven, you can download and use the client jar directly from GitHub, then download and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) example:
 
 ```
+$ wget https://github.com/chadharrington/all_spark_cube/releases/download/0.6-release/cube_client-0.6-standalone.jar
 $ wget -O HelloWorld.java http://git.io/hellojavacube
 $ javac -cp .:cube_client-0.6-standalone.jar HelloWorld.java
 $ java -cp .:cube_client-0.6-standalone.jar HelloWorld
