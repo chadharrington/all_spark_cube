@@ -62,13 +62,19 @@ client.send();
 
 print 'Success...'
 ```
-Download and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/python_client/examples/helloworld.py) demo:
+Download the code and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/python_client/examples/helloworld.py) demo on the cube:
 
 ```
 $ wget -O helloworld.py http://git.io/hellopycube
 $ python helloworld.py
 ```
 
+You should see the cube change colors as specified in the program (first LED 
+red, second LED teal, a row of yellow LEDs, etc.) You should see 
+"Success..." on your command line. If you get errors instead, open the 
+helloworld.py file and make sure the HOST 
+parameter is set to the correct network address for the cube. You should also
+make sure the cube is turned on and reachable over the network.
 
 ### Java Client 
 
@@ -76,23 +82,72 @@ $ python helloworld.py
 
 You have two options for installing the Java client:
 
-#### Install via Maven
+##### Install via Maven
 
-#### Direct Download 
+##### Direct Download 
 If you don't use Maven, you can download and use the client jar directly:
 
 `$ wget xxx`
 
-After you have the jar, you should download and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo. 
+#### Usage
+Here is the Java [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo:
+```
+import java.awt.Color;
+
+import com.allsparkcube.CubeClient;
+import org.apache.thrift.TException;
+
+
+public class HelloWorld {
+    public static void main(String[] args) {
+        try {
+
+            // final String HOST = "localhost";
+            final String HOST = "cube.ac";
+            final int PORT = 12345;
+        
+            CubeClient client = new CubeClient(HOST, PORT);
+
+            // Set all LEDs to blue
+            client.setAllLeds(Color.white); 
+
+            // Set the first LED (#0) to red
+            client.setLed(0, Color.red);
+
+            // Set the second LED (#1) to a custom color (teal-ish)
+            Color teal = new Color(100, 255, 95);
+            client.setLed(1, teal);
+        
+            // Starting at LED #48, set 16 LEDs to yellow
+            client.setLedRange(48, 16, Color.yellow); 
+
+            // Set the last LED (#4095) to green
+            client.setLed(4095, Color.green);
+        
+            // Actually send the data to the cube
+            client.send();  
+        
+            System.out.println("Success...");
+        } catch (TException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+``` 
+Download the code and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo on the cube:
 
 ```
 $ wget -O HelloWorld.java http://git.io/hellojavacube
 $ javac -cp .:xxx HelloWorld.java
 $ java -cp .:xxx HelloWorld
 ```
-The cube should update and you should see "Success..." on your command line. If 
-you get errors instead, open the HelloWorld.java file and make sure the HOST 
-parameter is set to the correct network address for the cube. You should also 
+
+You should see the cube change colors as specified in the program (first LED 
+red, second LED teal, a row of yellow LEDs, etc.) You should see 
+"Success..." on your command line. If you get errors instead, open the 
+HelloWorld.java file and make sure the HOST 
+parameter is set to the correct network address for the cube. You should also
 make sure the cube is turned on and reachable over the network.
 
 
