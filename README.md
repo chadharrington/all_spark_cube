@@ -125,10 +125,10 @@ public class HelloWorld {
 ``` 
 
 #### Installation
-You can install and use the Java client with or without Maven
+You can install and use the Java client with or without Maven.
 
 ##### Using Maven
-Clone the git repository, then build  and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) example using Maven.
+Clone the git repository, then build  and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) example using Maven:
 
 ```
 $ git clone https://github.com/chadharrington/all_spark_cube.git
@@ -137,13 +137,19 @@ $ mvn package
 $ cd target/com/mycompany
 $ java -cp hello-world-0.1-standalone.jar HelloWorld
 ```
+You should see the cube change colors as specified in the program (first LED 
+red, second LED teal, a row of yellow LEDs, etc.) You should see 
+"Success..." on your command line. If you get errors instead, open the 
+HelloWorld.java file and make sure the HOST 
+parameter is set to the correct network address for the cube. You should also
+make sure the cube is turned on and reachable over the network.
 
 #### Direct Download 
 If you don't use Maven, you can download and use the client jar directly from GitHub:
 
 `$ wget https://github.com/chadharrington/all_spark_cube/releases/download/0.6-release/cube_client-0.6-standalone.jar`
 
-Download the code and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo on the cube:
+Then download the code and run the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) example:
 
 ```
 $ wget -O HelloWorld.java http://git.io/hellojavacube
