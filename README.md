@@ -8,8 +8,8 @@ info is available here:
 ## Cube Client Libraries
 
 To interact with the All Spark Cube, you'll need a client library for your 
-preferred programming language. There are currently cube clients available for 
-Python and Java. Skip to the relevant section for your language.
+preferred programming language. There are currently cube client libraries 
+available for Python and Java. Skip to the relevant section for your language.
 
 ### Python Client 
 
