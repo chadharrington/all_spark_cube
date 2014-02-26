@@ -151,8 +151,8 @@ make sure the cube is turned on and reachable over the network.
 If you don't use Maven, you can download the client jar and [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) example directly from GitHub:
 
 ```
-$ wget https://github.com/chadharrington/all_spark_cube/releases/download/0.6-release/cube_client-0.6-standalone.jar
-$ wget -O HelloWorld.java http://git.io/hellojavacube
+$ wget http://git.io/cubejar -O cube_client-0.6-standalone.jar
+$ wget http://git.io/hellojavacube -O HelloWorld.java 
 $ javac -cp .:cube_client-0.6-standalone.jar HelloWorld.java
 $ java -cp .:cube_client-0.6-standalone.jar HelloWorld
 ```
