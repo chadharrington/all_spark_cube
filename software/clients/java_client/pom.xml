@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.allsparkcube</groupId>
   <artifactId>cube_client</artifactId>
@@ -8,10 +7,10 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
   <packaging>jar</packaging>
-  <version>0.6-SNAPSHOT</version>
+  <version>0.6</version>
   <name>Java Client for the All Spark Cube</name>
   <description>Java Client for the All Spark Cube</description>
-  <url>https://github.com/chadharrington/all_spark_cube</url>
+  <url>https://github.com/chadharrington/all_spark_cube</url>xo
   <licenses>
     <license>
       <name>MIT License</name>
@@ -24,9 +23,9 @@
     <system>GitHub Issues</system>
   </issueManagement>
   <scm>
-    <url>https://github.com/chadharrington/all_spark_cube</url>
+    <url>https://github.com/chadharrington/all_spark_cube/tags/0.6 release</url>
     <connection>
-      scm:git:https://github.com/chadharrington/all_spark_cube.git
+      scm:git:https://github.com/chadharrington/all_spark_cube.git/tags/0.6 release
     </connection>
   </scm>
   <developers>
@@ -46,6 +45,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <version>1.5.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
       <version>1.5.8</version>
     </dependency>
   </dependencies>

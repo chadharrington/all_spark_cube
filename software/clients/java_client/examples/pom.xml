@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.mycompany.app</groupId>
+  <artifactId>hello-world</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>Hello World Example for the All Spark Cube</name>
+  <url>https://github.com/chadharrington/all_spark_cube</url>
+  <dependencies>
+    <dependency>
+      <groupId>com.allsparkcube</groupId>
+      <artifactId>cube_client</artifactId>
+      <version>0.6</version>
+    </dependency>
+  </dependencies>
+</project>

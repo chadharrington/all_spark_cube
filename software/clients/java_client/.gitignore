@@ -2,3 +2,4 @@ target
 *.class
 *.releaseBackup
 release.properties
+pom.xml.asc

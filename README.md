@@ -83,9 +83,16 @@ You have two options for installing the Java client:
 ##### Install via Maven
 
 ##### Direct Download 
-If you don't use Maven, you can download and use the client jar directly:
+If you don't use Maven, you can download and use the client jar directly from GitHub:
 
 `$ wget xxx`
+
+Get the required dependency jars, as well:
+```
+$ wget http://search.maven.org/remotecontent?filepath=org/apache/thrift/libthrift/0.9.1/libthrift-0.9.1.jar -O libthrift-0.9.1.jar
+$ wget http://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-simple/1.5.8/slf4j-simple-1.5.8.jar -O slf4j-simple-1.5.8.jar
+$ wget http://search.maven.org/remotecontent?filepath=org/slf4j/slf4j-api/1.5.8/slf4j-api-1.5.8.jar -O slf4j-api.1.5.8.jar
+```
 
 #### Usage
 The Java [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo is below. Note that the API uses the [java.awt.Color](http://docs.oracle.com/javase/7/docs/api/java/awt/Color.html) class to specify colors for the LEDs.
@@ -137,8 +144,8 @@ Download the code and run the [Hello World](https://github.com/chadharrington/al
 
 ```
 $ wget -O HelloWorld.java http://git.io/hellojavacube
-$ javac -cp .:xxx HelloWorld.java
-$ java -cp .:xxx HelloWorld
+$ javac -cp .:cube_client-0.6.jar:libthrift-0.9.1.jar:slf4j-simple-1.5.8.jar:slf4j-api.1.5.8.jar HelloWorld.java
+$ java -cp .:cube_client-0.6.jar:libthrift-0.9.1.jar:slf4j-simple-1.5.8.jar:slf4j-api.1.5.8.jar HelloWorld
 ```
 
 You should see the cube change colors as specified in the program (first LED 
