@@ -26,17 +26,15 @@ part of the underlying [Thrift](http://thrift.apache.org/) library, and don't
 affect the cube client library.
 
 #### Usage
-Here is the [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/python_client/examples/helloworld.py) demo:
+Here is the Python [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/python_client/examples/helloworld.py) demo:
 ```
 #!/usr/bin/env python
 
 from all_spark_cube_client import CubeClient, Color, Colors
 
-
 #HOST = 'localhost'
 HOST = 'cube.ac'
 PORT = 12345
-
 
 client = CubeClient(HOST, PORT)
 
@@ -90,7 +88,7 @@ If you don't use Maven, you can download and use the client jar directly:
 `$ wget xxx`
 
 #### Usage
-Here is the Java [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo:
+The Java [Hello World](https://github.com/chadharrington/all_spark_cube/blob/master/software/clients/java_client/examples/HelloWorld.java) demo is below. Note that the API uses the [java.awt.Color](http://docs.oracle.com/javase/7/docs/api/java/awt/Color.html) class to specify colors for the LEDs.
 ```
 import java.awt.Color;
 
