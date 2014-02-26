@@ -26,9 +26,12 @@ PORT = 12345
 
 client = CubeClient(HOST, PORT)
 
-# Set all LEDs to blue. 
 # Built-in colors are: red, green, blue, yellow, cyan, magenta, 
 # white, black, gray, orange, pink, light_yellow, and dark_green
+# You can also create any arbitrary color by creating an instance 
+# of the Color class with the R, G, and B values specified.
+
+# Set all LEDs to blue. 
 client.set_all_leds(Colors.blue)
 
 # Set the first LED (#0) to red
