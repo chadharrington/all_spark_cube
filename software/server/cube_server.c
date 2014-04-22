@@ -48,9 +48,9 @@ int main(int argc, char**argv)
 
         recvlen = recvfrom(sockfd, msg, MSG_SIZE, 0, 
                            (struct sockaddr *) &cliaddr, &addrlen);
+        printf("recvlen: %d\n", recvlen);
         if (recvlen == MSG_SIZE) {
             memcpy(shmem, msg, MSG_SIZE);
-            printf(".");
         }
     }
 }

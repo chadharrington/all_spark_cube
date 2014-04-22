@@ -4,7 +4,7 @@ ez_setup.use_setuptools()
 from setuptools import setup, find_packages
 
 setup(name='all_spark_cube_client',
-      version='0.5',
+      version='0.7',
       description='Python client library for the All Spark Cube',
       classifiers=[
           'Development Status :: 4 - Beta',
@@ -16,6 +16,6 @@ setup(name='all_spark_cube_client',
       author='Chad Harrington',
       author_email='chad.harrington@gmail.com',
       license='MIT',
-      packages=find_packages(),
-      install_requires=['thrift'])
+      packages=find_packages())
+
 

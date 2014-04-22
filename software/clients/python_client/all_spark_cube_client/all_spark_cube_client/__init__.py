@@ -1,12 +1,7 @@
-import sys
+import socket
 
-from thrift.protocol import TBinaryProtocol
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-
-from cube_interface import CubeInterface
-
-NUM_VOXELS = 4096
+NUM_LEDS = 4096
+BUF_SIZE = NUM_LEDS * 3
 
 
 class Color(object):
@@ -34,15 +29,15 @@ class Colors(object):
 
 class CubeClient(object):
     def __init__(self, host, port):
-        socket = TSocket.TSocket(host, port)
-        self.transport = TTransport.TBufferedTransport(socket)
-        self.protocol = TBinaryProtocol.TBinaryProtocol(self.transport)
-        self.client = CubeInterface.Client(self.protocol)
-        self.transport.open()
-        self.buffer = [0 for x in range(NUM_VOXELS *3)]
+        self.host = host
+        self.port = port
+        self.buffer = bytearray(BUF_SIZE)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, BUF_SIZE)
 
     def __del__(self):
-        self.transport.close()
+        self.sock.close()
+        del self.sock
 
     def set_led(self, led_num, color):
         """Set a single LED to the specified color."""
@@ -57,9 +52,9 @@ class CubeClient(object):
 
     def set_all_leds(self, color):
         """Set all LEDs to the specified color."""
-        self.set_led_range(0, 4096, color)
+        self.set_led_range(0, NUM_LEDS, color)
 
     def send(self):
         """Actually send the data to the cube."""
-        self.client.set_data(self.buffer)
+        self.sock.sendto(bytearray(self.buffer), (self.host, self.port))
         
