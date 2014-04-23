@@ -14,7 +14,13 @@ SUPERVISORD_CONF_DEST = /etc/$(SUPERVISORD_CONF)
 CC = gcc
 CFLAGS = -O3 -Wall
 
-all: $(DIST_DIR)/$(DRIVER_NAME) $(DIST_DIR)/$(SERVER_NAME)  $(DIST_DIR)/$(PEEKER_NAME)
+all: server driver peeker
+
+server: $(DIST_DIR)/$(SERVER_NAME)
+
+driver: $(DIST_DIR)/$(DRIVER_NAME)
+
+peeker: $(DIST_DIR)/$(PEEKER_NAME)
 
 $(DIST_DIR)/$(DRIVER_NAME): $(DRIVER_NAME).c
 	@mkdir -p $(DIST_DIR)
@@ -53,4 +59,4 @@ clean:
 	@-rm -rf $(DIST_DIR)
 
 
-.PHONY: all install uninstall clean
+.PHONY: all driver server peeker install uninstall clean
