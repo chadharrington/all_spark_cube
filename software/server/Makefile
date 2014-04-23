@@ -3,6 +3,7 @@ DIST_DIR = dist
 INSTALL_DIR = /opt/adaptive/cube
 DRIVER_NAME = cube_driver
 SERVER_NAME = cube_server
+PEEKER_NAME = peek_shmem
 RULES_FILE = 99-libftdi.rules
 RULES_DEST =  /etc/udev/rules.d/$(RULES_FILE)
 CUBE_INIT_FILE = initialization.bin
@@ -13,17 +14,20 @@ SUPERVISORD_CONF_DEST = /etc/$(SUPERVISORD_CONF)
 CC = gcc
 CFLAGS = -O3 -Wall
 
-all: driver server
+all: $(DIST_DIR)/$(DRIVER_NAME) $(DIST_DIR)/$(SERVER_NAME)  $(DIST_DIR)/$(PEEKER_NAME)
 
-driver: $(DRIVER_NAME).c
+$(DIST_DIR)/$(DRIVER_NAME): $(DRIVER_NAME).c
 	@mkdir -p $(DIST_DIR)
 	@$(CC) $(CFLAGS) $<  -o $(DIST_DIR)/$(DRIVER_NAME) \
 	    $(shell pkg-config --cflags --libs libftdi1)
 
-server: $(SERVER_NAME).c
+ $(DIST_DIR)/$(SERVER_NAME): $(SERVER_NAME).c
 	@mkdir -p $(DIST_DIR)
-	@$(CC) $(CFLAGS) $< -o $(DIST_DIR)/$(SERVER_NAME) 
+	@$(CC) $(CFLAGS) $< -o $@
 
+ $(DIST_DIR)/$(PEEKER_NAME): $(PEEKER_NAME).c
+	@mkdir -p $(DIST_DIR)
+	@$(CC) $(CFLAGS) $< -o $@
 
 install: driver server
 	@mkdir -p $(INSTALL_DIR)
@@ -46,8 +50,7 @@ uninstall: clean
 	@rm $(SUPERVISORD_CONF_DEST)
 
 clean:
-	@find . -name "*.pyc" -print0 | xargs -0 rm -rf
 	@-rm -rf $(DIST_DIR)
 
 
-.PHONY: all driver server install uninstall clean
+.PHONY: all install uninstall clean

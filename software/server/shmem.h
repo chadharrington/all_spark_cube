@@ -1,5 +1,8 @@
 #include <sys/mman.h>
 #include <sys/shm.h>
+#include <errno.h>
+#include <stdio.h> /* for fprintf */
+#include <stdlib.h> /* for exit */
 
 #define SHM_KEY 1278899529
 #define SHM_SIZE 12288

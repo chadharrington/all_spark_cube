@@ -167,25 +167,22 @@ make sure the cube is turned on and reachable over the network.
 
 ## Cube Server Install
 These instructions are only relevant for installing the server onto the computer 
-inside the All Spark Cube. Cube users only need to install a client library, not
-the server code.
+inside the All Spark Cube. Cube users need not install the server code.
 
 The server code and these instructions assume a CentOS / RHEL server.
 
-1 - Install supervisor from http://supervisord.org/
+1 - Install supervisor from http://supervisord.org
 2 - Run these commands:
 
 ```    
-$ sudo yum install thrift boost
 $ git clone https://github.com/chadharrington/all_spark_cube.git
-$ cd all_spark_cube/software/thrift
-$ make
-$ cd ../server
+$ cd all_spark_cube/software/server
 $ sudo make install
 $ sudo reboot now
 ```
 
-The server will automatically start on reboot / powerup.
+The server will automatically start on reboot / powerup. If everything installed
+correctly, the cube should display all white LEDs after booting.
 
 ## Support
 

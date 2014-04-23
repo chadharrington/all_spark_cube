@@ -10,13 +10,14 @@
 #define SHM_PERMS 0666 | IPC_CREAT
 #define MSG_SIZE 4096*3
 #define PORT 12345
-
+#define INIT_FILENAME "/opt/adaptive/cube/initialization.bin"
 
 int main(int argc, char**argv)
 {
     int sockfd, recvlen, optval;
     struct sockaddr_in servaddr, cliaddr;
     socklen_t addrlen;
+    FILE* initfile;
     BYTE msg[MSG_SIZE];
     BYTE* shmem;
 
@@ -43,9 +44,16 @@ int main(int argc, char**argv)
     addrlen = sizeof(cliaddr);
     shmem = get_shared_mem(SHM_PERMS);
 
+    initfile = fopen(INIT_FILENAME, "r");
+    if (initfile == NULL) {
+        fprintf(stderr, "Can't open initialization file %s\n", INIT_FILENAME);
+        exit(-1);
+    }
+    fread(shmem, sizeof(BYTE), MSG_SIZE, initfile);
+    fclose(initfile);
+    
     printf("Starting server...\n");
     while (1) {
-
         recvlen = recvfrom(sockfd, msg, MSG_SIZE, 0, 
                            (struct sockaddr *) &cliaddr, &addrlen);
         printf("recvlen: %d\n", recvlen);
