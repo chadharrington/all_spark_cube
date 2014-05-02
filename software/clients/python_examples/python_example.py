@@ -1,7 +1,7 @@
 import socket
 
-#HOST = 'cube.ac'
-HOST = 'localhost'
+HOST = 'cube.ac'
+#HOST = 'localhost'
 PORT = 12345
 NUM_LEDS = 4096
 BUF_SIZE = NUM_LEDS * 3 # There are 3 bytes (R,G, & B) for each LED
@@ -22,8 +22,9 @@ for led in range(NUM_LEDS):
 # Don't send more than that.
 sock.sendto(buffer, (HOST, PORT)) 
 
-#Turn the second LED white
-buffer[led * 3] = 255       # Red
-buffer[led * 3 + 1] = 255   # Green
+#Turn the second LED blue
+led = 1 
+buffer[led * 3] = 0       # Red
+buffer[led * 3 + 1] = 0   # Green
 buffer[led * 3 + 2] = 255   # Blue
 sock.sendto(buffer, (HOST, PORT))

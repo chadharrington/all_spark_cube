@@ -3,8 +3,8 @@
 import time
 import socket
 
-#HOST = 'cube.ac'
-HOST = 'localhost'
+HOST = 'cube.ac'
+#HOST = 'localhost'
 PORT = 12345
 NUM_LEDS = 4096
 BUF_SIZE = NUM_LEDS * 3 # There are 3 bytes (R,G, & B) for each LED
