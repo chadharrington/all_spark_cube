@@ -18,4 +18,6 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: %s <byte_num>\n", argv[0]);
         exit(-1);
     }
+
+    return 0;
 }

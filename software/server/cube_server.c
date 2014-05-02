@@ -98,4 +98,6 @@ int main(int argc, char**argv)
     init_cube(shmem);
     sockfd = get_udp_socket();
     serve(shmem, sockfd);
+    
+    return 0;
 }
