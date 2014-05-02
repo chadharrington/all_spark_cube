@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 
 #include "shmem.h"
 
@@ -12,10 +13,18 @@
 #define PORT 12345
 #define INIT_FILENAME "/opt/adaptive/cube/initialization.bin"
 
+long timevaldiff(struct timeval *starttime, struct timeval *finishtime)
+{
+    long msec;
+    msec=(finishtime->tv_sec-starttime->tv_sec)*1000;
+    msec+=(finishtime->tv_usec-starttime->tv_usec)/1000;
+    return msec;
+}
+
 int main(int argc, char**argv)
 {
     int reps = 10000;
-    int sockfd, recvlen, optval, ret;
+    int sockfd, recvlen, optval, ret, i;
     struct sockaddr_in servaddr, cliaddr;
     socklen_t addrlen;
     struct timeval start, end;
@@ -67,8 +76,8 @@ int main(int argc, char**argv)
         }
         ret = gettimeofday(&end, NULL);
         duration = timevaldiff(&start, &end) / 1000.0f;
-        printf("Board# %s: %d frames in %.2f secs. %.2f fps.\n", 
-               (char*) serial_num, reps, duration, reps / duration);
+        printf("%d frames in %.2f secs. %.2f fps.\n", 
+               reps, duration, reps / duration);
 
     }
 }
