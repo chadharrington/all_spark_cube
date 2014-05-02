@@ -14,9 +14,12 @@
 
 int main(int argc, char**argv)
 {
-    int sockfd, recvlen, optval;
+    int reps = 10000;
+    int sockfd, recvlen, optval, ret;
     struct sockaddr_in servaddr, cliaddr;
     socklen_t addrlen;
+    struct timeval start, end;
+    float duration;
     FILE* initfile;
     BYTE msg[MSG_SIZE];
     BYTE* shmem;
@@ -54,11 +57,18 @@ int main(int argc, char**argv)
     
     printf("Starting server...\n");
     while (1) {
-        recvlen = recvfrom(sockfd, msg, MSG_SIZE, 0, 
-                           (struct sockaddr *) &cliaddr, &addrlen);
-        printf("recvlen: %d\n", recvlen);
-        if (recvlen == MSG_SIZE) {
-            memcpy(shmem, msg, MSG_SIZE);
+        ret = gettimeofday(&start, NULL);
+        for (i=0; i<reps; ++i) {
+            recvlen = recvfrom(sockfd, msg, MSG_SIZE, 0, 
+                               (struct sockaddr *) &cliaddr, &addrlen);
+            if (recvlen == MSG_SIZE) {
+                memcpy(shmem, msg, MSG_SIZE);
+            }
         }
+        ret = gettimeofday(&end, NULL);
+        duration = timevaldiff(&start, &end) / 1000.0f;
+        printf("Board# %s: %d frames in %.2f secs. %.2f fps.\n", 
+               (char*) serial_num, reps, duration, reps / duration);
+
     }
 }

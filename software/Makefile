@@ -1,9 +1,7 @@
-PROJECTS = thrift clients server
+PROJECTS = clients server
 
 
 projects: $(PROJECTS)
-clients: thrift
-server: thrift
 
 $(PROJECTS):
 	@$(MAKE) -C $@

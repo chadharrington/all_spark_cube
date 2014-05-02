@@ -27,20 +27,22 @@ $(DIST_DIR)/$(DRIVER_NAME): $(DRIVER_NAME).c
 	@$(CC) $(CFLAGS) $<  -o $(DIST_DIR)/$(DRIVER_NAME) \
 	    $(shell pkg-config --cflags --libs libftdi1)
 
- $(DIST_DIR)/$(SERVER_NAME): $(SERVER_NAME).c
+$(DIST_DIR)/$(SERVER_NAME): $(SERVER_NAME).c
 	@mkdir -p $(DIST_DIR)
 	@$(CC) $(CFLAGS) $< -o $@
 
- $(DIST_DIR)/$(PEEKER_NAME): $(PEEKER_NAME).c
+$(DIST_DIR)/$(PEEKER_NAME): $(PEEKER_NAME).c
 	@mkdir -p $(DIST_DIR)
 	@$(CC) $(CFLAGS) $< -o $@
 
-install: driver server
+install: all
 	@mkdir -p $(INSTALL_DIR)
 	@cp $(DIST_DIR)/$(DRIVER_NAME) $(INSTALL_DIR)
 	@chmod ugo+x $(INSTALL_DIR)/$(DRIVER_NAME)
 	@cp $(DIST_DIR)/$(SERVER_NAME) $(INSTALL_DIR)
 	@chmod ugo+x $(INSTALL_DIR)/$(SERVER_NAME)
+	@cp $(DIST_DIR)/$(PEEKER_NAME) $(INSTALL_DIR)
+	@chmod ugo+x $(INSTALL_DIR)/$(PEEKER_NAME)
 	@cp $(RULES_FILE) $(RULES_DEST)
 	@chmod 644 $(RULES_DEST)
 	@cp $(CUBE_INIT_FILE) $(INSTALL_DIR)

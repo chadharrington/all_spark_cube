@@ -326,7 +326,7 @@ void* manage_board(void* serial_num)
     struct timespec t;
     
     t.tv_sec = 0;
-    t.tv_nsec = 8e6; /* 8 ms delay between loops */
+    t.tv_nsec = 3e6; /* 3 ms delay between loops */
     
     init_board(&board, (char*) serial_num);
     while (1) {
