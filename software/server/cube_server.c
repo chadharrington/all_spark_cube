@@ -21,17 +21,10 @@ long timevaldiff(struct timeval *starttime, struct timeval *finishtime)
     return msec;
 }
 
-int main(int argc, char**argv)
+int get_udp_socket()
 {
-    int reps = 10000;
-    int sockfd, recvlen, optval, ret, i;
-    struct sockaddr_in servaddr, cliaddr;
-    socklen_t addrlen;
-    struct timeval start, end;
-    float duration;
-    FILE* initfile;
-    BYTE msg[MSG_SIZE];
-    BYTE* shmem;
+    int sockfd, optval;
+    struct sockaddr_in servaddr;
 
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) {
@@ -53,9 +46,12 @@ int main(int argc, char**argv)
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(PORT);
     bind(sockfd, (struct sockaddr *) &servaddr, sizeof(servaddr));
-    addrlen = sizeof(cliaddr);
-    shmem = get_shared_mem(SHM_PERMS);
+    return sockfd;
+}
 
+void init_cube(BYTE* shmem) 
+{
+    FILE* initfile;
     initfile = fopen(INIT_FILENAME, "r");
     if (initfile == NULL) {
         fprintf(stderr, "Can't open initialization file %s\n", INIT_FILENAME);
@@ -63,7 +59,19 @@ int main(int argc, char**argv)
     }
     fread(shmem, sizeof(BYTE), MSG_SIZE, initfile);
     fclose(initfile);
-    
+}
+
+void serve(BYTE* shmem, int sockfd) 
+{
+    int i, recvlen, ret;
+    int reps = 10000;
+    BYTE msg[MSG_SIZE];
+    struct timeval start, end;
+    float duration;
+    struct sockaddr_in cliaddr;
+    socklen_t addrlen;
+
+    addrlen = sizeof(cliaddr);
     printf("Starting server...\n");
     while (1) {
         ret = gettimeofday(&start, NULL);
@@ -78,6 +86,16 @@ int main(int argc, char**argv)
         duration = timevaldiff(&start, &end) / 1000.0f;
         printf("%d frames in %.2f secs. %.2f fps.\n", 
                reps, duration, reps / duration);
+    }    
+}
 
-    }
+int main(int argc, char**argv)
+{
+    BYTE* shmem;
+    int sockfd;
+
+    shmem = get_shared_mem(SHM_PERMS);
+    init_cube(shmem);
+    sockfd = get_udp_socket();
+    serve(shmem, sockfd);
 }
