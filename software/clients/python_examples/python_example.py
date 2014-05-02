@@ -18,7 +18,9 @@ for led in range(NUM_LEDS):
     buffer[led * 3] = 255     # Red
     buffer[led * 3 + 1] = 0   # Green
     buffer[led * 3 + 2] = 0   # Blue
-sock.sendto(buffer, (HOST, PORT))
+# Cube won't display more than 100 frames per second.
+# Don't send more than that.
+sock.sendto(buffer, (HOST, PORT)) 
 
 #Turn the second LED white
 buffer[led * 3] = 255       # Red
